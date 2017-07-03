@@ -3,14 +3,15 @@ This is an easy to use and easy to customizable chat bot, feel free to fork and 
 
 ## Features
 Everything is running locally
--Get wr for any game, category and variables
--Set Game/Title
--Add/remove commands with/without individual/global cooldowns
--TODO: Purge shortened links automatically
--TODO: Set community
--TODO: Get wr/pb for the current game
--TODO: Add/remove/approve quotes, get random quotes
--TODO: Answer questions automatically (based on regex)
+
+- Get wr for any game, category and variables
+- Set Game/Title
+- Add/remove commands with/without individual/global cooldowns
+- TODO: Purge shortened links automatically
+- TODO: Set community
+- TODO: Get wr/pb for the current game
+- TODO: Add/remove/approve quotes, get random quotes
+- TODO: Answer questions automatically (based on regex)
 
 # Installation
 Clone the repository  
