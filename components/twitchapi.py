@@ -69,9 +69,13 @@ class TwitchApi:
         """
         Get community by name
         Returns:
-            The matching community
+            The matching community, None if no is found
         """
-        return requests.get(self.twitch_base_url+'communities?name='+name, headers=self.get_headers()).json()
+        
+        response = requests.get(self.twitch_base_url+'communities?name='+name, headers=self.get_headers())
+        if response.status_code != 200:
+            return None
+        return response.json()
     
     def get_video(self, video_id):
         """

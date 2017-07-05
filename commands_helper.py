@@ -131,7 +131,7 @@ class CommandsHelper:
             if not command.enabled:
                 return
             #Check mod/broadcaster only
-            if command.mod_only and not check_mod(tags):
+            if command.mod_only and not (check_mod(tags) or check_broadcaster(tags)):
                 return
             if command.broadcaster_only and not check_broadcaster(tags):
                 return

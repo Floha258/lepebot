@@ -5,13 +5,14 @@ This is an easy to use and easy to customizable chat bot, feel free to fork and 
 Everything is running locally
 
 - Get wr for any game, category and variables
-- Set Game/Title
+- Set Game/Title/Community
 - Add/remove commands with/without individual/global cooldowns
+- Display Information about twitch-videos posted in chat
 - TODO: Purge shortened links automatically
-- TODO: Set community
 - TODO: Get wr/pb for the current game
 - TODO: Add/remove/approve quotes, get random quotes
 - TODO: Answer questions automatically (based on regex)
+- TODO: Display information about youtube-videos posted in chat
 
 # Installation
 Clone the repository  
@@ -28,3 +29,12 @@ This config contains all important private information to let the bot connect to
 `twitch_client_secret`: Client secret of you registered application  
 `channel`: Channel, the bot should join  
 `twitch_id`: Id of the channel, is displayed at startup if left blank
+
+# Commands
+
+- !wr
+- !settitle
+- !setgame
+- !setcommunity
+- !removecommunity
+- !uptime

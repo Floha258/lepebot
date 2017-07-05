@@ -11,22 +11,29 @@ class Component(_EC):
     
     def load(self):
         def setgame(username, message, channel, tags):
-            #check rights
-            if 'broadcaster' in tags['badges'] or 'mod' in tags['badges']:
-                response=self.ta.set_game(self.ta.twitch_id, message)
-                if response.status_code==200:
-                    self.irc.sendprivmsg(channel, 'Updated Game')
+            response=self.ta.set_game(self.ta.twitch_id, message)
+            if response.status_code==200:
+                self.irc.sendprivmsg(channel, 'Updated Game')
                     
-        self.bot.register_privmsg_command('setgame',setgame)
+        self.bot.register_privmsg_command('setgame',setgame, mod_only=True)
         def settitle(username, message, channel, tags):
-            #check rights
-            if 'broadcaster' in tags['badges'] or 'mod' in tags['badges']:
-                response=self.ta.set_title(self.ta.twitch_id, message)
-                if response.status_code==200:
-                    self.irc.sendprivmsg(channel, 'Updated Title')
+            response=self.ta.set_title(self.ta.twitch_id, message)
+            if response.status_code==200:
+                self.irc.sendprivmsg(channel, 'Updated Title')
                     
-        self.bot.register_privmsg_command('settitle',settitle)
-        #TODO Community
+        self.bot.register_privmsg_command('settitle',settitle, mod_only=True)
+        def setcommunity(username, message, channel, tags):
+            found_community=self.ta.get_community(message)
+            if found_community!=None:
+                response = self.ta.set_community(self.ta.twitch_id, found_community['_id'])
+                if response.status_code==204:
+                    self.irc.sendprivmsg(channel, 'Updated Community')
+        self.bot.register_privmsg_command('setcommunity',setcommunity, mod_only=True)
+        def removecommunity(username, message, channel, tags):
+            response = self.ta.remove_community(self.ta.twitch_id)
+            if response.status_code==204:
+                self.irc.sendprivmsg(channel, 'Removed Community')
+        self.bot.register_privmsg_command('removecommunity',removecommunity, mod_only=True)
         def uptime(username, message, channel, tags):
             stream = self.ta.get_stream(self.ta.twitch_id)
             if stream == None:
@@ -44,4 +51,6 @@ class Component(_EC):
     def unload(self):
         self.bot.unregister_privmsg_command('setgame')
         self.bot.unregister_privmsg_command('settitle')
+        self.bot.unregister_privmsg_command('setcommunity')
+        self.bot.unregister_privmsg_command('removecommunity')
         self.bot.unregister_privmsg_command('uptime')
