@@ -30,7 +30,16 @@ This config contains all important private information to let the bot connect to
 `channel`: Channel, the bot should join  
 `twitch_id`: Id of the channel, is displayed at startup if left blank
 
+# Startup
+change to this directory and run `main_bot.py`, if you want to enabled debug output, set the environmentvariable `DEBUG` to 1.
+
 # Commands
+
+There are 2 types of commands:
+
+Commands, that only return a text in the channel (with {username} and {channel} replaced by the correct strings), that are stored in the database and added/deleted via chat commands (see below).
+
+Commands, that are added to the `commands_helper` of the bot, calling functions and doing real actions.
 
 - !wr
 - !settitle
@@ -38,3 +47,11 @@ This config contains all important private information to let the bot connect to
 - !setcommunity
 - !removecommunity
 - !uptime
+- !addcmd [name] [response] (add new command)
+- !setcmd [name] [response] (change existing command)
+- !setcmdccd [name] [cooldown] (set cooldown for command in channel)
+- !setcmducd [name] [cooldown] (set cooldown for command for all users)
+- !setcmdmodonly [name] [0 or 1] (set command mod-only, 1 is yes)
+- !setcmdbroadcasteronly [name] [0 or 1] (set command broadcaster-only, 1 is yes)
+- !setcmdenabled [name] [0 or 1] (enable/disable command, 1 is enabled)
+- !delcmd [name] (delete the command)

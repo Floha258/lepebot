@@ -12,10 +12,108 @@ class Component(_EC):
             self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
     
     def load(self):
-        pass
+        def addcmd(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            if self.add_command(parts[0], parts[1]):
+                self.irc.sendprivmsg(channel, 'Added command {}'.format(parts[0]))
+            else:
+                self.irc.sendprivmsg(channel, 'Command {} already exists!'.format(parts[0]))
+        self.bot.register_privmsg_command('addcmd',addcmd, mod_only=True)
+        def setcmd(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            if self.set_response(parts[0], parts[1]):
+                self.irc.sendprivmsg(channel, 'Changed command {}'.format(parts[0]))
+            else:
+                self.irc.sendprivmsg(channel, 'Command {} doesn\' exist!'.format(parts[0]))
+        self.bot.register_privmsg_command('setcmd',setcmd, mod_only=True)
+        def setcmdccd(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            try:
+                cd=int(parts[1])
+                if self.set_channel_cooldown(parts[0], cd):
+                    self.irc.sendprivmsg(channel, 'Channel Cooldown for {} set to {}'.format(parts[0], cd))
+                else:
+                    self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
+            except:
+                pass
+        self.bot.register_privmsg_command('setcmdccd',setcmdccd, mod_only=True)
+        def setcmducd(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            try:
+                cd=int(parts[1])
+                if self.set_user_cooldown(parts[0], cd):
+                    self.irc.sendprivmsg(channel, 'User Cooldown for {} set to {}'.format(parts[0], cd))
+                else:
+                    self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
+            except:
+                pass
+        self.bot.register_privmsg_command('setcmducd',setcmducd, mod_only=True)
+        def setcmdmodonly(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            try:
+                mo=int(parts[1])==1
+                if self.set_mod_only(parts[0], mo):
+                    self.irc.sendprivmsg(channel, 'Mod-only for {} set to {}'.format(parts[0], mo))
+                else:
+                    self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
+            except:
+                pass
+        self.bot.register_privmsg_command('setcmdmodonly',setcmdmodonly, mod_only=True)
+        def setcmdbroadcasteronly(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            try:
+                bo=int(parts[1])==1
+                if self.set_broadcaster_only(parts[0], bo):
+                    self.irc.sendprivmsg(channel, 'Broadcaster-only for {} set to {}'.format(parts[0], bo))
+                else:
+                    self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
+            except:
+                pass
+        self.bot.register_privmsg_command('setcmdbroadcasteronly',setcmdbroadcasteronly, mod_only=True)
+        def setcmdenabled(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=2:
+                return
+            try:
+                en=int(parts[1])==1
+                if self.set_enabled(parts[0], en):
+                    self.irc.sendprivmsg(channel, 'Enabled for {} set to {}'.format(parts[0], en))
+                else:
+                    self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
+            except:
+                pass
+        self.bot.register_privmsg_command('setcmdenabled',setcmdenabled, mod_only=True)
+        def delcmd(username, channel, message, tags):
+            parts=message.split(' ',1)
+            if len(parts)!=1:
+                return
+            if self.remove_command(parts[0]):
+                self.irc.sendprivmsg(channel, 'Successfully deleted command {}'.format(parts[0]))
+            else:
+                self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
+        self.bot.register_privmsg_command('delcmd',delcmd, mod_only=True)
     
     def unload(self):
-        pass
+        self.bot.unregister_privmsg_command('addcmd')
+        self.bot.unregister_privmsg_command('setcmd')
+        self.bot.unregister_privmsg_command('setcmdccd')
+        self.bot.unregister_privmsg_command('setcmducd')
+        self.bot.unregister_privmsg_command('setcmdmodonly')
+        self.bot.unregister_privmsg_command('setcmdbroadcasteronly')
+        self.bot.unregister_privmsg_command('setcmdenabled')
+        self.bot.unregister_privmsg_command('delcmd')
     
     def add_command(self, name, response):
         command=Command(name, response)
@@ -25,6 +123,7 @@ class Component(_EC):
         else:
             return False
         self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command())
+        return True
 
     def set_response(self, name, response):
         if db_get_command(name) == None:
