@@ -8,6 +8,7 @@ class Component(_EC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         print(self.config)
+        self.default_param=self.config['default-param']
     
     def load(self):
         def wr(channel, username, tags, message):
@@ -15,10 +16,16 @@ class Component(_EC):
         self.bot.register_privmsg_command('wr',wr)
         def gamesearch(channel, username, tags, message):
             self.irc.sendprivmsg(channel,self.srgamesearch(message))
-        self.bot.register_privmsg_command('srsearch',gamesearch)
+        self.bot.register_privmsg_command('searchgame',gamesearch)
+        def srcurrent(channel, username, tags, message):
+            self.default_param=message
+        self.bot.register_privmsg_command('srcurrent',srcurrent,mod_only=True)
     
     def getwrstr(self, params):
         """Returns the wrstring from the given command"""
+        params=params.strip()
+        if len(params)==0:
+            params=self.default_param
         game, cat, varis = parse_game_cat_var_cached(params)
         if game == None:
             return 'Game not found'
@@ -44,6 +51,8 @@ class Component(_EC):
         
     def unload(self):
         self.bot.unregister_privmsg_command('wr')
+        self.bot.unregister_privmsg_command('searchgame')
+        self.bot.unregister_privmsg_command('srcurrent')
 
 gamecache={}
 
@@ -118,6 +127,8 @@ def parse_game_cat_var_cached(toparse):
     Returns:
         Game, Category, list of (Variable, (valueid, valuename))
     """ 
+    if len(toparse)==0:
+        return None, None, None
     split=toparse.split(' ',1)
     gameabb=split[0]
     game=getgamecached(gameabb)

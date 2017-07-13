@@ -41,17 +41,19 @@ Commands, that only return a text in the channel (with {username} and {channel} 
 
 Commands, that are added to the `commands_helper` of the bot, calling functions and doing real actions.
 
-- !wr
-- !settitle
-- !setgame
-- !setcommunity
-- !removecommunity
-- !uptime
-- !addcmd [name] [response] (add new command)
-- !setcmd [name] [response] (change existing command)
-- !setcmdccd [name] [cooldown] (set cooldown for command in channel)
-- !setcmducd [name] [cooldown] (set cooldown for command for all users)
-- !setcmdmodonly [name] [0 or 1] (set command mod-only, 1 is yes)
-- !setcmdbroadcasteronly [name] [0 or 1] (set command broadcaster-only, 1 is yes)
-- !setcmdenabled [name] [0 or 1] (enable/disable command, 1 is enabled)
-- !delcmd [name] (delete the command)
+- !wr [gameabbreviation] [category] [;variablename:value] (get the current world record for a game listed on speedrun.com)
+- !searchgame [game] (searches speedrun.com for abbreviation for the given game to use with the wr command)
+- !srcurrent [param] ([mod only] set the current default params for the wr command if it is used without params)
+- !settitle [title] ([mod only] set a new title for the broadcast)
+- !setgame [game] ([mod only] set the game for the broadcast)
+- !setcommunity [community] ([mod only] set the community for the broadcast)
+- !removecommunity ([mod only] remove the community for the broadcast)
+- !uptime (display the time the stream is up)
+- !addcmd [name] [response] ([mod only] add new command)
+- !setcmd [name] [response] ([mod only] change existing command)
+- !setcmdccd [name] [cooldown] ([mod only] set cooldown for command in channel)
+- !setcmducd [name] [cooldown] ([mod only] set cooldown for command for all users)
+- !setcmdmodonly [name] [0 or 1] ([mod only] set command mod-only, 1 is yes)
+- !setcmdbroadcasteronly [name] [0 or 1] ([mod only] set command broadcaster-only, 1 is yes)
+- !setcmdenabled [name] [0 or 1] ([mod only] enable/disable command, 1 is enabled)
+- !delcmd [name] ([mod only] delete the command)
