@@ -7,6 +7,7 @@ class Component(_EC):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        db_create_command_table()
         self.commands={}
         for command in db_get_all_commands():
             self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
@@ -122,7 +123,7 @@ class Component(_EC):
             db_add_command(command)
         else:
             return False
-        self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command())
+        self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
         return True
 
     def set_response(self, name, response):
@@ -170,7 +171,7 @@ class Component(_EC):
     def remove_command(self, name):
         if db_get_command(name) == None:
             return False
-        self.bot.commands_helper.privmsg_commands[name].enabled=enabled
+        del self.bot.commands_helper.privmsg_commands[name]
         db_remove_command(name)
         return True
 

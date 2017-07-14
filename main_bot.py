@@ -107,5 +107,6 @@ if __name__=='__main__':
                 except Exception as e:
                     print('Error unloading module '+name+':\n',e)
             self.irc.shutdown()
+            self.database.close()
             
     bot=Lepebot()
