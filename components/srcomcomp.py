@@ -3,23 +3,35 @@ from datetime import timedelta
 from .empty_component import EmptyComponent as _EC
 from util import format_time
 
+#gameabbreviation:Game
+gamecache={}
+#username:User
+usercache={}
+
 class Component(_EC):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         print(self.config)
         self.default_param=self.config['default-param']
+        self.default_user=getusercached(self.config['default-username'])
     
     def load(self):
         def wr(channel, username, tags, message):
             self.irc.sendprivmsg(channel,self.getwrstr(message))
         self.bot.register_privmsg_command('wr',wr)
+        def pb(channel, username, tags, message):
+            self.irc.sendprivmsg(channel,self.getpbstr(message))
+        self.bot.register_privmsg_command('pb',pb)
         def gamesearch(channel, username, tags, message):
             self.irc.sendprivmsg(channel,self.srgamesearch(message))
         self.bot.register_privmsg_command('searchgame',gamesearch)
         def srcurrent(channel, username, tags, message):
             self.default_param=message
         self.bot.register_privmsg_command('srcurrent',srcurrent,mod_only=True)
+        def sruser(channel, username, tags, message):
+            self.default_user=getusercached(message)
+        self.bot.register_privmsg_command('sruser',sruser,mod_only=True)
     
     def getwrstr(self, params):
         """Returns the wrstring from the given command"""
@@ -38,6 +50,35 @@ class Component(_EC):
         if varstring != '':
             varstring='('+varstring+')'
         return 'The wr for '+game.name+': '+cat.name+' '+varstring+' is '+time+' by '+name
+        return 'The wr for {}: {} {} is {} by {}'.format(game.name, cat.name, varstring, time, name)
+    
+    def getpbstr(self, params):
+        """Returns the pbstring for the given command"""
+        params=params.strip()
+        if len(params)==0:
+            gameparams=self.default_param
+            user=self.default_user
+        else:
+            splitparams=params.split(' ',1)
+            if len(splitparams)==2:
+                gameparams=splitparams[1]
+                user=getusercached(splitparams[0])
+            else:
+                return 'Wrong command usage!'
+        game, cat, varis = parse_game_cat_var_cached(gameparams)
+        if game == None:
+            return 'Game not found'
+        if cat == None:
+            return 'Availiable categories are: '+', '.join(cate.name for cate in game.categories)
+        #Get all default subcategory variables
+        place, time = getpbs(user.id, game.id, cat.id, varis)
+        if place==None:
+            return 'No PB found'
+        varstring=','.join(var.name+':'+val[1] for var, val in varis)
+        if varstring != '':
+            varstring='('+varstring+')'
+        return 'The pb of {} for {}: {} {} is {} (place {})'.format(user.name, game.name, cat.name, varstring, time, place)
+        
     
     def srgamesearch(self, query):
         """
@@ -51,10 +92,10 @@ class Component(_EC):
         
     def unload(self):
         self.bot.unregister_privmsg_command('wr')
+        self.bot.unregister_privmsg_command('pb')
         self.bot.unregister_privmsg_command('searchgame')
         self.bot.unregister_privmsg_command('srcurrent')
-
-gamecache={}
+        self.bot.unregister_privmsg_command('sruser')
 
 class Variable:
     def __init__(self, data):
@@ -62,11 +103,12 @@ class Variable:
         self.id=data["id"]
         self.default=data["values"]["default"]
         self.scope=data["scope"]["type"]
+        self.subcategory=data['is-subcategory']
         self.category=data["category"]
         self.values=[(value[0],value[1]['label'].lower()) for value in data["values"]["values"].items()]
     
     def __repr__(self):
-        return self.name+' '+str(self.values)
+        return self.name+'('+self.id+')'+' '+str(self.values)
 
 class Category:
     def __init__(self, data):
@@ -94,6 +136,11 @@ class Game:
                         cat.variables.append(variable)
                         break
 
+class User:
+    def __init__(self, data):
+        self.name=data['names']['international']
+        self.id=data['id']
+
 def searchgame(query):
     """
     Searches sppedrun.com games for the given string
@@ -114,6 +161,22 @@ def getgamecached(gameabb):
             game=Game(response.json()['data'])
             gamecache[gameabb]=game
             return game
+        else:
+            return None
+
+def getusercached(username):
+    if username in usercache:
+        return usercache[username]
+    else:
+        response=_requests_get_srcomapi('users', params={'lookup':username})
+        if response.status_code == 200:
+            results=response.json()['data']
+            if len(results)!=0:
+                user = User(results[0])
+                usercache[username]=user
+                return user
+            else:
+                return None
         else:
             return None
 
@@ -190,6 +253,29 @@ def getwr(gameid, categoryid, variables):
         name=player['names']['international']
     return name, formated_time
 
+def getpbs(userid, gameid, catid, varis):
+    """
+    Returns the pb of the given user and the given game, category and with the subcategories
+    Returns:
+        place(int), formated_time(str)
+        place on the leaderboard and the time
+    """
+    response=_requests_get_srcomapi('users/{user}/personal-bests'.format(user=userid),params={'game':gameid})
+    if response.status_code==200:
+        runs = response.json()['data']
+        match = list(filter(lambda item:_varcheck(varis,item['run']['values']),filter(lambda item:item['run']['category']==catid,runs)))
+        if len(match)<1:
+            return None, None
+        elif len(match)==1:
+            place=match[0]['place']
+            formated_time=format_time(match[0]['run']['times']['primary_t'])
+            return place, formated_time
+        else:
+            sort = sorted(map(lambda run: (run['run']['times']['primary_t'],run['place']),match))
+            return sort[0][1], format_time(sort[0][0])
+    else:
+        return None, None
+
 def _varsearch(varis, varname, varvalue):
     for var in varis:
         if var.name==varname:
@@ -197,6 +283,12 @@ def _varsearch(varis, varname, varvalue):
                 if val[1]==varvalue:
                     return (var, val)
     return None
+
+def _varcheck(expected, actual):
+    for var, val in expected:
+        if not (var.id in actual and actual[var.id]==val[0]):
+            return False
+    return True
 
 def _requests_get_srcomapi(url, **kwargs):
     """

@@ -4,12 +4,11 @@ This is an easy to use and easy to customizable chat bot, feel free to fork and 
 ## Features
 Everything is running locally
 
-- Get wr for any game, category and variables
+- Get wr/pb for any/current game, category and variables
 - Set Game/Title/Community
 - Add/remove commands with/without individual/global cooldowns
 - Display Information about twitch-videos posted in chat
 - TODO: Purge shortened links automatically
-- TODO: Get wr/pb for the current game
 - TODO: Add/remove/approve quotes, get random quotes
 - TODO: Answer questions automatically (based on regex)
 - TODO: Display information about youtube-videos posted in chat
@@ -42,8 +41,10 @@ Commands, that only return a text in the channel (with {username} and {channel} 
 Commands, that are added to the `commands_helper` of the bot, calling functions and doing real actions.
 
 - !wr [gameabbreviation] [category] [;variablename:value] (get the current world record for a game listed on speedrun.com)
+- !pb [username] [gameabbreviation] [category] [;variablename:value] (get the pb of the given user by game, category and subcategories defined by the variables)
 - !searchgame [game] (searches speedrun.com for abbreviation for the given game to use with the wr command)
 - !srcurrent [param] ([mod only] set the current default params for the wr command if it is used without params)
+- !sruser [username] ([mod only] set the current default username for the pb command)
 - !settitle [title] ([mod only] set a new title for the broadcast)
 - !setgame [game] ([mod only] set the game for the broadcast)
 - !setcommunity [community] ([mod only] set the community for the broadcast)
