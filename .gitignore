@@ -95,3 +95,6 @@ config
 
 #Database should not be committed
 bot.db
+#Python-Project files aren't needed
+.project
+.pydevproject
