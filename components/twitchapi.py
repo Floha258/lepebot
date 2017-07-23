@@ -87,6 +87,22 @@ class TwitchApi:
         else:
             return response.json()
 
+    def getfollow(self, user_id, channel_id):
+        """
+        Get a follow object for the given user_id and channel_id
+        Params:
+            user_id (str): ID of the user
+            channel_id (str): ID of the channel
+        Returns:
+            Json returned by the twitch api, None if user
+            doesn't follow the channel
+        """
+        response = requests.get(self.twitch_base_url+'users/{}/follows/channels/{}'.format(user_id, channel_id), headers=self.get_headers())
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
     def getfollowers(self, user_id, limit):
         """Get the latest followers from the specified user
         Params:

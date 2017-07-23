@@ -1,3 +1,4 @@
+import string
 def format_time(time):
     """
     Formats seconds (with milliseconds) to a string
@@ -16,3 +17,12 @@ def format_time(time):
             return ('{m:.0f}m '+secf).format(m=mins,s=secs)
     else:
         return ('{h:.0f}h {m:02.0f}m '+secf).format(h=hours,m=mins,s=secs)
+
+def format_time_delta(timedelta):
+    """
+    Formats a timedelta to a string
+    """
+    if timedelta.days==0:
+        return format_time(timedelta.total_seconds())
+    else:
+        return '{}d '.format(timedelta.days)+format_time(timedelta.seconds+timedelta.microseconds)

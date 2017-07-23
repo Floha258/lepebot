@@ -1,7 +1,7 @@
 from .empty_component import EmptyComponent as _EC
 from .twitchapi import TwitchApi
 from datetime import datetime
-from util import format_time
+from util import format_time, format_time_delta
 
 class Component(_EC):
     
@@ -43,7 +43,17 @@ class Component(_EC):
             delta = datetime.utcnow()-start
             self.irc.sendprivmsg(channel, '@{user}, I\'ve been live for {time}'.format(user=username, time=format_time(int(delta.total_seconds()))))
             
-        self.bot.register_privmsg_command('uptime',uptime)
+        self.bot.register_privmsg_command('uptime',uptime, channel_cooldown=15)
+        def followage(username, message, channel, tags):
+            user_id=tags['user-id']
+            follow = self.ta.getfollow(user_id, self.ta.twitch_id)
+            if follow == None:
+                self.irc.sendprivmsg(channel, 'You don\'t follow me @{} BibleThump'.format(username))
+            else:
+                followed_since=datetime.strptime(follow['created_at'],'%Y-%m-%dT%H:%M:%SZ')
+                followed_diff=datetime.now()-followed_since
+                self.irc.sendprivmsg(channel, 'You follow me for {} @{}'.format(format_time_delta(followed_diff),username))
+        self.bot.register_privmsg_command('followage',followage,user_cooldown=20)
         if self.ta.twitch_id == None:
             self.ta.twitch_id=self.ta.get_user(self.bot.channel)['_id']
             print('Your twitch_id is:'+self.ta.twitch_id)
