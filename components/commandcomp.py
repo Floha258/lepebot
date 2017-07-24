@@ -8,8 +8,9 @@ class Component(_EC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         db_create_command_table()
-        self.commands={}
+        self.commands=set()
         for command in db_get_all_commands():
+            self.commands.add(command.name)
             self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
     
     def load(self):
@@ -18,6 +19,7 @@ class Component(_EC):
             if len(parts)!=2:
                 return
             if self.add_command(parts[0], parts[1]):
+                self.commands.add(parts[0])
                 self.irc.sendprivmsg(channel, 'Added command {}'.format(parts[0]))
             else:
                 self.irc.sendprivmsg(channel, 'Command {} already exists!'.format(parts[0]))
@@ -101,10 +103,15 @@ class Component(_EC):
             if len(parts)!=1:
                 return
             if self.remove_command(parts[0]):
+                self.commands.discard(parts[0])
                 self.irc.sendprivmsg(channel, 'Successfully deleted command {}'.format(parts[0]))
             else:
                 self.irc.sendprivmsg(channel, 'Command {} doesn\'t exist!'.format(parts[0]))
         self.bot.register_privmsg_command('delcmd',delcmd, mod_only=True)
+        def cmdreload(username, channel, message, tags):
+            self.cmd_reload()
+            self.irc.sendprivmsg(channel, 'Successfully reloaded commands')
+        self.bot.register_privmsg_command('cmdreload',cmdreload, mod_only=True)
     
     def unload(self):
         self.bot.unregister_privmsg_command('addcmd')
@@ -115,6 +122,21 @@ class Component(_EC):
         self.bot.unregister_privmsg_command('setcmdbroadcasteronly')
         self.bot.unregister_privmsg_command('setcmdenabled')
         self.bot.unregister_privmsg_command('delcmd')
+        self.bot.unregister_privmsg_command('cmdreload')
+        for commandname in self.commands:
+            self.bot.unregister_privmsg_command(commandname)
+        self.commands.clear()
+    
+    def cmd_reload(self):
+        """
+        Reload custom commands from the database, in case something changed there
+        """
+        for commandname in self.commands:
+            self.bot.unregister_privmsg_command(commandname)
+        self.commands.clear()
+        for command in db_get_all_commands():
+            self.commands.add(command.name)
+            self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
     
     def add_command(self, name, response):
         command=Command(name, response)
