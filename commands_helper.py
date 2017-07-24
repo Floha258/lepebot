@@ -115,6 +115,30 @@ class CommandsHelper:
         if name in self.whisper_commands:
             del self.whisper_commands[name]
     
+    def check_privmsgcommand_exists(self, name):
+        """
+        Check if the privmsgcommand given by name exists
+        """
+        return name in self.privmsg_commands
+    
+    def check_whispercommand_exists(self, name):
+        """
+        Check if the whispercommand given by name exists
+        """
+        return name in self.whisper_commands
+    
+    def get_privmsgcommand(self, name):
+        """
+        Returns the privmsgcommand by name or None if it doesn't exist
+        """
+        return self.privmsg_commands[name] if self.check_privmsgcommand_exists(name) else None
+    
+    def get_whispercommand(self, name):
+        """
+        Returns the whispercommand by name or None if it doesn't exist
+        """
+        return self.whisper_commands[name] if self.check_whispercommand_exists(name) else None
+    
     def privmsg_listener(self, username, channel, message, tags):
         if message.startswith('!'):
             split=message[1:].split(' ',1)

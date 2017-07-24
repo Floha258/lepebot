@@ -52,6 +52,7 @@ Commands, that are added to the `commands_helper` of the bot, calling functions 
 - !uptime (display the time the stream is up)
 - !addcmd [name] [response] ([mod only] add new command)
 - !setcmd [name] [response] ([mod only] change existing command)
+- !setcmdname [oldname] [newname] ([mod only] rename a command)
 - !setcmdccd [name] [cooldown] ([mod only] set cooldown for command in channel)
 - !setcmducd [name] [cooldown] ([mod only] set cooldown for command for all users)
 - !setcmdmodonly [name] [0 or 1] ([mod only] set command mod-only, 1 is yes)

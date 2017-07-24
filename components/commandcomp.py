@@ -2,6 +2,7 @@
 from .empty_component import EmptyComponent as _EC
 import db_helper
 from commands_helper import PrivmsgCommand
+from threading import _newname
 
 class Component(_EC):
     
@@ -33,6 +34,17 @@ class Component(_EC):
             else:
                 self.irc.sendprivmsg(channel, 'Command {} doesn\' exist!'.format(parts[0]))
         self.bot.register_privmsg_command('setcmd',setcmd, mod_only=True)
+        def setcmdname(username, channel, message, tags):
+            parts=message.split(' ')
+            if len(parts)!=2:
+                return
+            if self.set_name(parts[0], parts[1]):
+                self.commands.discard(parts[0])
+                self.commands.add(parts[1])
+                self.irc.sendprivmsg(channel, 'Renamed command {} to {}'.format(*parts))
+            else:
+                self.irc.sendprivmsg(channel, 'Command couldn\'t be renamed because it doesn\'t exist or the new name is taken')
+        self.bot.register_privmsg_command('setcmdname',setcmdname, mod_only=True)
         def setcmdccd(username, channel, message, tags):
             parts=message.split(' ',1)
             if len(parts)!=2:
@@ -116,6 +128,7 @@ class Component(_EC):
     def unload(self):
         self.bot.unregister_privmsg_command('addcmd')
         self.bot.unregister_privmsg_command('setcmd')
+        self.bot.unregister_privmsg_command('setcmdname')
         self.bot.unregister_privmsg_command('setcmdccd')
         self.bot.unregister_privmsg_command('setcmducd')
         self.bot.unregister_privmsg_command('setcmdmodonly')
@@ -141,11 +154,21 @@ class Component(_EC):
     def add_command(self, name, response):
         command=Command(name, response)
         #Check if already exists or return false
-        if db_get_command(name) == None:
+        if db_get_command(name) == None or self.cmd_in_cmd_helper(name):
             db_add_command(command)
         else:
             return False
         self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
+        return True
+
+    def set_name(self, oldname, newname):
+        if db_get_command(oldname) == None or db_get_command(newname) != None or self.cmd_in_cmd_helper(newname):
+            return False
+        db_set_name(oldname, newname)
+        command = self.bot.commands_helper.get_privmsgcommand(oldname)
+        command.name=newname
+        self.bot.commands_helper.remove_privmsg_command(oldname)
+        self.bot.commands_helper._add_privmsg_command(command)
         return True
 
     def set_response(self, name, response):
@@ -197,6 +220,9 @@ class Component(_EC):
         db_remove_command(name)
         return True
 
+    def cmd_in_cmd_helper(self,command):
+        return self.bot.commands_helper.check_privmsgcommand_exists(command)
+
 
 class Command:
     """
@@ -227,6 +253,8 @@ INSERT_STATEMENT='INSERT INTO `commands` (`name`, `response`, `channel_cooldown`
 
 UPDATE_STATEMENT='UPDATE `commands` SET `response`=?, `channel_cooldown`=?, `user_cooldown`=?, `mod_only`=?, `broadcaster_only`=?, `enabled`=? WHERE `name`=?'
 
+ALTER_NAME_STATEMENT='UPDATE `commands` SET `name`=? WHERE `name`=?'
+
 ALTER_RESPONSE_STATEMENT='UPDATE `commands` SET `response`=? WHERE `name`=?'
 
 ALTER_CHANNEL_COOLDOWN_STATEMENT='UPDATE `commands` SET `channel_cooldown`=? WHERE `name`=?'
@@ -252,6 +280,9 @@ def db_add_command(command):
 
 def db_update_command(command):
     db_helper.execute(UPDATE_STATEMENT, (command.response, command.channel_cooldown, command.user_cooldown, command.mod_only, command.broadcaster_only, command.enabled, command.name))
+
+def db_set_name(oldname, newname):
+    db_helper.execute(ALTER_NAME_STATEMENT,(newname,oldname))
 
 def db_set_response(name, response):
     db_helper.execute(ALTER_RESPONSE_STATEMENT,(response, name))
