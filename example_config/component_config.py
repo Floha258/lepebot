@@ -8,6 +8,7 @@ config={
 'srcomcomp':{'active':True, 'config':{'default-param':'botw all dungeons;amiibo:no amiibo','default-username':'your_speedrun.com_username'}},
 'twitch_manager':{'active':True, 'config':{}},
 'twitch_video_checker':{'active':True, 'config':{}},
-'commandcomp':{'active':True, 'config':{}}
+'commandcomp':{'active':True, 'config':{}},
+'autoresponsecomp':{'active':True, 'config':{}}
 }
 }

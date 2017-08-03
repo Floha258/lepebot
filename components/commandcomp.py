@@ -2,7 +2,6 @@
 from .empty_component import EmptyComponent as _EC
 import db_helper
 from commands_helper import PrivmsgCommand
-from threading import _newname
 
 class Component(_EC):
     
