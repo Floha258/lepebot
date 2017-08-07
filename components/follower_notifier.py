@@ -1,7 +1,7 @@
 from .empty_component import EmptyComponent as _EC
 from config.twitch_config import twitch_id, channel
+import requests
 import threading
-import time
 
 class Component(_EC):
 
@@ -10,15 +10,34 @@ class Component(_EC):
         self.stop_event=threading.Event()
     
     def load(self):
-        self.old_follow_list=[follow['user']['_id'] for follow in self.bot.twitch_api.getfollowers(twitch_id,10)['follows']]
+        self.stop_event.clear()
+        try:
+            raw_follows=self.bot.twitch_api.getfollowers(twitch_id,10)
+            if raw_follows==None:
+                self.old_follow_list=None
+            else:
+                self.old_follow_list=[follow['user']['_id'] for follow in raw_follows['follows']]
+        except requests.ConnectionError:
+            print('Connection error in follower_notifier')
+            self.old_follow_list=None
+            
         def _check():
             while True:
                 #Waits for 25 seconds but if the event is fired to stop, it determinates
                 #Timeout returns False, set the event returns True
-                if True == self.stop_event.wait(25):
+                if True == self.stop_event.wait(5):
                     break
-                current_follows=self.bot.twitch_api.getfollowers(twitch_id,10)['follows']
-                self.process_change(self.old_follow_list, current_follows)
+                try:
+                    raw_current_follows=self.bot.twitch_api.getfollowers(twitch_id,10)
+                except requests.ConnectionError:
+                    print('Connection error in follower_notifier')
+                    continue
+                #Just ignore temporary errors
+                if raw_current_follows==None:
+                    continue
+                current_follows=raw_current_follows['follows']
+                if self.old_follow_list!=None:
+                    self.process_change(self.old_follow_list, current_follows)
                 self.old_follow_list=[follow['user']['_id'] for follow in current_follows]
         threading.Thread(target=_check).start()
     

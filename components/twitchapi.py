@@ -109,9 +109,13 @@ class TwitchApi:
             user_id (str): ID of the user
             limit (int): number of followers to display
         Returns:
-            Json returned from the twitch api
+            Json returned from the twitch api or None if a Error was returned
         """
-        return requests.get(self.twitch_base_url+'channels/{channel}/follows?limit={limit}'.format(channel=user_id, limit=limit), headers=self.get_headers()).json()
+        response = requests.get(self.twitch_base_url+'channels/{channel}/follows?limit={limit}'.format(channel=user_id, limit=limit), headers=self.get_headers())
+        if response.status_code==200:
+            return response.json()
+        else:
+            return None
 
     def set_game(self, user_id, name):
         """
