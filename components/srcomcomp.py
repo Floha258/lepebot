@@ -63,6 +63,8 @@ class Component(_EC):
             if len(splitparams)==2:
                 gameparams=splitparams[1]
                 user=getusercached(splitparams[0])
+                if user==None:
+                    return 'User {} doesn\'t exist!'.format(splitparams[0])
             else:
                 return 'Wrong command usage!'
         game, cat, varis = parse_game_cat_var_cached(gameparams)
@@ -176,8 +178,10 @@ def getusercached(username):
                 usercache[username]=user
                 return user
             else:
+                usercache[username]=None
                 return None
         else:
+            usercache[username]=None
             return None
 
 def parse_game_cat_var_cached(toparse):
