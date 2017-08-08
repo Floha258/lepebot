@@ -25,4 +25,4 @@ def format_time_delta(timedelta):
     if timedelta.days==0:
         return format_time(timedelta.total_seconds())
     else:
-        return '{}d '.format(timedelta.days)+format_time(timedelta.seconds+timedelta.microseconds)
+        return '{}d '.format(timedelta.days)+format_time(timedelta.seconds+timedelta.microseconds/1000000)
