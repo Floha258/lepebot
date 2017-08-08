@@ -51,7 +51,7 @@ class Component(_EC):
                 self.irc.sendprivmsg(channel, 'You don\'t follow me @{} BibleThump'.format(username))
             else:
                 followed_since=datetime.strptime(follow['created_at'],'%Y-%m-%dT%H:%M:%SZ')
-                followed_diff=datetime.now()-followed_since
+                followed_diff=datetime.utcnow()-followed_since
                 self.irc.sendprivmsg(channel, 'You follow me for {} @{}'.format(format_time_delta(followed_diff),username))
         self.bot.register_privmsg_command('followage',followage,user_cooldown=20)
         if self.ta.twitch_id == None:
