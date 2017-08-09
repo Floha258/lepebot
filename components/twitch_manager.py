@@ -16,12 +16,26 @@ class Component(_EC):
                 self.irc.sendprivmsg(channel, 'Updated Game')
                     
         self.bot.register_privmsg_command('setgame',setgame, mod_only=True)
+        def getgame(username, message, channel, tags):
+            channelobj=self.ta.get_channel(self.ta.twitch_id)
+            if channelobj==None:
+                self.irc.sendprivmsg(channel, 'Error')
+            else:
+                self.irc.sendprivmsg(channel, '@{} current game: {}'.format(username,channelobj['game']))
+        self.bot.register_privmsg_command('getgame',getgame,channel_cooldown=15)
         def settitle(username, message, channel, tags):
             response=self.ta.set_title(self.ta.twitch_id, message)
             if response.status_code==200:
                 self.irc.sendprivmsg(channel, 'Updated Title')
                     
         self.bot.register_privmsg_command('settitle',settitle, mod_only=True)
+        def gettitle(username, message, channel, tags):
+            channelobj=self.ta.get_channel(self.ta.twitch_id)
+            if channelobj==None:
+                self.irc.sendprivmsg(channel, 'Error')
+            else:
+                self.irc.sendprivmsg(channel, '@{} current title: {}'.format(username,channelobj['status']))
+        self.bot.register_privmsg_command('gettitle',gettitle,channel_cooldown=15)
         def setcommunity(username, message, channel, tags):
             found_community=self.ta.get_community(message)
             if found_community!=None:
@@ -61,6 +75,8 @@ class Component(_EC):
     def unload(self):
         self.bot.unregister_privmsg_command('setgame')
         self.bot.unregister_privmsg_command('settitle')
+        self.bot.unregister_privmsg_command('getgame')
+        self.bot.unregister_privmsg_command('gettitle')
         self.bot.unregister_privmsg_command('setcommunity')
         self.bot.unregister_privmsg_command('removecommunity')
         self.bot.unregister_privmsg_command('uptime')

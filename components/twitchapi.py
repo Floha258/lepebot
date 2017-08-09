@@ -65,6 +65,15 @@ class TwitchApi:
             return None
         return result.json()['stream']
 
+    def get_channel(self, channel_id):
+        """
+        Returns a channel for the given id or None if it doesn't exist
+        """
+        result = requests.get(self.twitch_base_url+'channels/'+channel_id, headers=self.get_headers())
+        if result.status_code != 200:
+            return None
+        return result.json()
+
     def get_community(self, name):
         """
         Get community by name
