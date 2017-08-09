@@ -80,3 +80,4 @@ class Component(_EC):
         self.bot.unregister_privmsg_command('setcommunity')
         self.bot.unregister_privmsg_command('removecommunity')
         self.bot.unregister_privmsg_command('uptime')
+        self.bot.unregister_privmsg_command('followage')
