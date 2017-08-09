@@ -18,6 +18,10 @@ class PrivmsgCommand:
             broadcaster_only(bool, default=False): If only broadcaster can use this command
                 enabled(bool, default=True): If the command can be used in chat, otherwise it's useless
         """
+        self._name=None
+        def assignname(nm):
+            self._name=nm.lower()
+        self.name=property(lambda:self._name,assignname)
         self.name=name
         self.func=func
         self.channel_cooldown=channel_cooldown
@@ -41,6 +45,10 @@ class WhisperCommand:
             func (function): Function to handle the command, params: (username, channel, message, tags)
             user_cooldown (int, optional): Number of seconds of cooldown, after a user can use this command again
         """
+        self._name=None
+        def assignname(nm):
+            self._name=nm.lower()
+        self.name=property(lambda:self._name,assignname)
         self.name=name
         self.func=func
         self.user_cooldown=user_cooldown
@@ -142,7 +150,7 @@ class CommandsHelper:
     def privmsg_listener(self, username, channel, message, tags):
         if message.startswith('!'):
             split=message[1:].split(' ',1)
-            commandname=split[0]
+            commandname=split[0].lower()
             if len(split)==1:
                 rest=''
             else:
@@ -182,7 +190,7 @@ class CommandsHelper:
     def whisper_listener(self, username, message, tags):
         if message.startswith('!'):
             split=message[1:].split(' ',1)
-            commandname=split[0]
+            commandname=split[0].lower()
             if len(split)==1:
                 rest=''
             else:
