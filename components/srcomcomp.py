@@ -32,6 +32,9 @@ class Component(_EC):
         def sruser(channel, username, tags, message):
             self.default_user=getusercached(message)
         self.bot.register_privmsg_command('sruser',sruser,mod_only=True)
+        def srvars(channel, username, tags, message):
+            self.irc.sendprivmsg(channel, self.getvarsstring(message))
+        self.bot.register_privmsg_command('srvars',srvars)
     
     def getwrstr(self, params):
         """Returns the wrstring from the given command"""
@@ -81,7 +84,17 @@ class Component(_EC):
             varstring='('+varstring+')'
         return 'The pb of {} for {}: {} {} is {} (place {})'.format(user.name, game.name, cat.name, varstring, time, place)
         
-    
+    def getvarsstring(self, params):
+        #Var is not needed and ignored
+        game, cat, var = parse_game_cat_var_cached(params)
+        if game == None:
+            return 'Please specify a valid game'
+        availablevars=game.variables.copy()
+        if cat!=None:
+            availablevars.extend(cat.variables)
+        formattedvars=map(lambda var:'{} ({})'.format(var.name,', '.join(map(lambda val:val[1],var.values))), availablevars)
+        return ', '.join(formattedvars)
+
     def srgamesearch(self, query):
         """
         Search for max 5 Games by a query to get the name and the abbreviation
@@ -92,12 +105,15 @@ class Component(_EC):
         else:
             return ', '.join(name + '(' + abb + ')' for name, abb in games)
         
+    
+    
     def unload(self):
         self.bot.unregister_privmsg_command('wr')
         self.bot.unregister_privmsg_command('pb')
         self.bot.unregister_privmsg_command('searchgame')
         self.bot.unregister_privmsg_command('srcurrent')
         self.bot.unregister_privmsg_command('sruser')
+        self.bot.unregister_privmsg_command('srvars')
 
 class Variable:
     def __init__(self, data):
@@ -127,14 +143,16 @@ class Game:
         self.categories=[Category(catdata) for catdata in data["categories"]["data"] if catdata['type']=='per-game']
         self.variables=[]
         for var in data["variables"]["data"]:
+            if not var['scope']['type']=='global' and not var['scope']['type']=='full-game':
+                continue
             variable=Variable(var)
             #Include varibles for the whole game here
-            if variable.category == None and (variable.scope == 'global' or variable.scope == 'full-game'):
+            if variable.category == None:
                 self.variables.append(variable)
             else:
                 #Variables for individual categories
                 for cat in self.categories:
-                    if cat.id == variable.id:
+                    if cat.id == variable.category:
                         cat.variables.append(variable)
                         break
 
