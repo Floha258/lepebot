@@ -9,6 +9,7 @@ config={
 'twitch_manager':{'active':True, 'config':{}},
 'twitch_video_checker':{'active':True, 'config':{}},
 'commandcomp':{'active':True, 'config':{}},
-'autoresponsecomp':{'active':True, 'config':{}}
+'autoresponsecomp':{'active':True, 'config':{}},
+'timedmessagecomp':{'active':True, 'config':{}},
 }
 }

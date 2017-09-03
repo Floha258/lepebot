@@ -23,9 +23,9 @@ class Component(_EC):
             
         def _check():
             while True:
-                #Waits for 25 seconds but if the event is fired to stop, it determinates
+                #Waits for 25 seconds but if the event is fired to stop, it terminates
                 #Timeout returns False, set the event returns True
-                if True == self.stop_event.wait(5):
+                if True == self.stop_event.wait(25):
                     break
                 try:
                     raw_current_follows=self.bot.twitch_api.getfollowers(twitch_id,10)
