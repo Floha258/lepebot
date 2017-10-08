@@ -317,4 +317,4 @@ def _requests_get_srcomapi(url, **kwargs):
     Sends a requests to the srcomapi, (prefixed with speedrun.com/api/v1/)
     returns the result from requests
     """
-    return requests.get('http://www.speedrun.com/api/v1/'+url, headers={'User-Agent':'lepebot/17.42.99'},**kwargs)
+    return requests.get('https://www.speedrun.com/api/v1/'+url, headers={'User-Agent':'lepebot/17.42.99'},**kwargs)
