@@ -92,6 +92,8 @@ class Component(_EC):
         availablevars=game.variables.copy()
         if cat!=None:
             availablevars.extend(cat.variables)
+        if len(availablevars)==0:
+            return "No variables found"
         formattedvars=map(lambda var:'{} ({})'.format(var.name,', '.join(map(lambda val:val[1],var.values))), availablevars)
         return ', '.join(formattedvars)
 
