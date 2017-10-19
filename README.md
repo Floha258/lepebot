@@ -17,6 +17,7 @@ Everything is running locally
 # Installation
 Clone the repository  
 Install all required packages with `pip3 install -r requirements.txt`. If you don't have root privileges or want to install the packages just for you append ` --user` to the command.
+There seems to be a problem installing watchdogs on windows, because PyYAML can't be installed [this should help](https://stackoverflow.com/questions/33665181/how-to-install-pyyaml-on-windows-10)
 
 Copy the folder example_config and rename it to config.
 ### component_config
