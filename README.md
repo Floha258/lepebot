@@ -8,9 +8,10 @@ Everything is running locally
 - Set Game/Title/Community
 - Add/remove commands with/without individual/global cooldowns
 - Display Information about twitch-videos posted in chat
+- Answer questions automatically (based on regex), this is also pretty nice for memes
+- Display messages every x seconds
 - TODO: Purge shortened links automatically
 - TODO: Add/remove/approve quotes, get random quotes
-- TODO: Answer questions automatically (based on regex)
 - TODO: Display information about youtube-videos posted in chat
 
 # Installation
@@ -30,7 +31,7 @@ This config contains all important private information to let the bot connect to
 `twitch_id`: Id of the channel, is displayed at startup if left blank
 
 # Startup
-change to this directory and run `main_bot.py`, if you want to enabled debug output, set the environmentvariable `DEBUG` to 1.
+change to this directory and run `main_bot.py`, if you want to enabled debug output, set the environmentvariable `DEBUG` to 1
 
 # Commands
 
@@ -59,3 +60,32 @@ Commands, that are added to the `commands_helper` of the bot, calling functions 
 - !setcmdbroadcasteronly [name] [0 or 1] ([mod only] set command broadcaster-only, 1 is yes)
 - !setcmdenabled [name] [0 or 1] ([mod only] enable/disable command, 1 is enabled)
 - !delcmd [name] ([mod only] delete the command)
+
+# Components
+Some components store additional information in the database, you can edit this file (`bot.db`) with a sqlite program. When saving changes, the bot reloads all information in the database.
+## speedrun.com (srcomcomp)
+Component to display information about PBs, WRs, Games and Categories. In your config you can change the `default-param` to a string used by the !wr command (see above documentation for more detailed explanation about this) and `default-username` to your speedrun.com username.
+
+## commandcomp
+See the Commands section above for information, simple commands (only response) are stored in a database, table `commands`.
+
+## follower_notifier
+Shout out all new followers
+
+## timedmessagecomp
+Send a message at a specified intervall in the chat, currently only configurable directly in the database, table `timedmessages`.  
+Columns:
+
+- `id` unique id for each row
+- `message` message that should be send periodically
+- `inittime` initial waiting time in seconds before sending the message the first time
+- `looptime` intervall in seconds when to send the message again and again
+- `enabled` 0 means disabled, 1 means enabled
+
+## regexresponse
+Send a message in the chat if a message matched a regex, stored in the database, table `regexresponse`. The regex may be any valid python-regex.  
+Columns:
+
+- `regex` valid python regex that is checked
+- `response` message that is send in the channel if the regex matches
+- `cooldown` add a cooldown to the response

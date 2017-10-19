@@ -1,8 +1,12 @@
 import sqlite3
 import threading
 import os
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+except ImportError:
+    print('watchdog is not installed, install it using `pip3 install watchdog`, use it with `--user` if necessary')
+    os.exit(1)
 
 #Fix multiple thread database access
 db_lock=threading.Lock()
