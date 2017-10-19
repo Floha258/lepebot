@@ -109,4 +109,5 @@ if __name__=='__main__':
             self.irc.shutdown()
             self.database.close()
             
+            
     bot=Lepebot()

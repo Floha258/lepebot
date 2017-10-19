@@ -9,6 +9,7 @@ class Component(_EC):
         super().__init__(*args, **kwargs)
         db_helper.execute(CREATE_TABLE_STATEMENT)
         self.timedmessages=list()
+        db_helper.add_db_change_listener(self.db_reload)
     
     def load(self):
         self.timedmessages=db_get_all()

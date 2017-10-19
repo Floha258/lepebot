@@ -12,6 +12,7 @@ class Component(_EC):
         for command in db_get_all_commands():
             self.commands.add(command.name)
             self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
+        db_helper.add_db_change_listener(self.cmd_reload)
     
     def load(self):
         def addcmd(username, channel, message, tags):

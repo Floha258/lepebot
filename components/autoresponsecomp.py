@@ -37,6 +37,7 @@ class Component(_EC):
                     self.irc.sendprivmsg(channel, regres.response)
                     return
         self.msglistener=_msglistener
+        db_helper.add_db_change_listener(self.regres_reload)
 
     def load(self):
         db_helper.execute(CREATE_TABLE_STATEMENT)
