@@ -40,7 +40,10 @@ class Component(_EC):
         """Returns the wrstring from the given command"""
         params=params.strip()
         if len(params)==0:
-            params=self.default_param
+            if len(self.default_param)==0:
+                return "No WR found"
+            else:
+                params=self.default_param
         game, cat, varis = parse_game_cat_var_cached(params)
         if game == None:
             return 'Game not found'
@@ -61,6 +64,8 @@ class Component(_EC):
         if len(params)==0:
             gameparams=self.default_param
             user=self.default_user
+            if len(gameparams)==0 or len(user)==0:
+                return "No PB found"
         else:
             splitparams=params.split(' ',1)
             if len(splitparams)==2:
