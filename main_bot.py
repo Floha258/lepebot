@@ -1,3 +1,5 @@
+#!/usr/bin/python3 -i
+
 from config.twitch_config import username, oauth_token, channel
 from config.component_config import config as component_config
 from twitchircclient import TwitchIrcClient, MockIrcClient
