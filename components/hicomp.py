@@ -5,9 +5,8 @@ class Component(_EC):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(self.config)
     
-    def load(self):
+    def load(self, config):
         def sayhi(channel, username, tags, message):
             self.irc.sendprivmsg(channel,'HI @'+username)
         def whisperhi(username, message, tags):
@@ -18,3 +17,9 @@ class Component(_EC):
     def unload(self):
         self.bot.unregister_privmsg_command('hi')
         self.bot.unregister_whisper_command('hi')
+
+    def get_default_settings(self):
+        return {'keep':'0'}
+
+    def on_update_settings(self, keys, settings):
+        pass

@@ -11,7 +11,7 @@ class Component(_EC):
         self.timedmessages=list()
         db_helper.add_db_change_listener(self.db_reload)
     
-    def load(self):
+    def load(self,config):
         self.timedmessages=db_get_all()
         for tm in self.timedmessages:
             if tm.enabled:
@@ -20,6 +20,12 @@ class Component(_EC):
     def unload(self):
         for tm in self.timedmessages:
             tm.stop()
+
+    def get_default_settings(self):
+        return {}
+
+    def on_change_settings(self, keys, settings):
+        pass
     
     def db_reload(self):
         for tm in self.timedmessages:

@@ -8,7 +8,7 @@ class Component(_EC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     
-    def load(self):
+    def load(self,config):
         def listener(channel, username, message, tags):
             found=TWITCHVIDEO.findall(message)
             if len(found)==0:
@@ -27,3 +27,10 @@ class Component(_EC):
     
     def unload(self):
         self.irc.messagespreader.remove(self.listener)
+
+    def get_default_settings(self):
+        return {}
+
+    def on_change_settings(self, keys, settings):
+        pass
+    

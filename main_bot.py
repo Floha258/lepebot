@@ -1,12 +1,20 @@
 #!/usr/bin/python3 -i
 
 from config.twitch_config import username, oauth_token, channel
-from config.component_config import config as component_config
+#component config file is deprecated
+try:
+    from config.component_config import config as component_config
+except:
+    component_config=None
 from twitchircclient import TwitchIrcClient, MockIrcClient
-from components import twitchapi
+from twitchapi import TwitchApi
 from commands_helper import CommandsHelper
 import db_helper
+import settings_db
 import importlib, os
+import glob
+from os.path import dirname, basename, isfile
+from collections import defaultdict
 
 if __name__=='__main__':
     class Lepebot:
@@ -20,10 +28,13 @@ if __name__=='__main__':
             self.debug=bool(os.getenv('DEBUG'))
             self.mock=bool(os.getenv('MOCK'))
             
-            #Init maybe useful variables
-            self.channel=channel
-            self.username=username
+            #Database connection:
+            self.database=db_helper
             
+            #Get all settings
+            settings_db.db_create_table()
+            self.settings=settings_db.db_select_all()
+
             #create main instance of the ircConnection
             if self.mock:
             #TODO
@@ -31,39 +42,68 @@ if __name__=='__main__':
             else:
                 self.irc = TwitchIrcClient(username, "oauth:"+oauth_token,debug=self.debug)
             
+            #Detect all components in the component directory (but not the default empty component)
+            files=glob.glob('components/*.py')
+            componentnames=[basename(f)[:-3] for f in files if isfile(f) and not f.endswith('empty_component.py')]
+                        
+            #Load components
+            self.components={}
+            defaultsettings=[]
+            for compname in componentnames:
+                self.components[compname]=importlib.import_module('components.'+compname).Component(self)
+                defaultsettings.append(settings_db.Setting(compname,'active','0'))
+                for key, value in self.components[compname].get_default_settings().items():
+                    defaultsettings.append(settings_db.Setting(compname, key, value))
+
+            #Apply legacy settings file
+            if component_config!=None:
+                filesettings=[]
+                for comp, setts in component_config['components'].items():
+                    filesettings.append(settings_db.Setting(comp,'active','1' if setts['active'] else '0'))
+                    if 'config' in setts:
+                        for key, value in setts['config'].items():
+                            filesettings.append(settings_db.Setting(comp, key, value))
+                difference=settings_db.generate_diff(self.settings, filesettings)
+                for actual, default in difference:
+                    if actual is None:
+                        self.settings.append(default)
+                        settings_db.db_insert_setting(default)
+                    
+            #Apply defaults
+            difference=settings_db.generate_diff(self.settings, defaultsettings)
+            for actual, default in difference:
+                if actual is None:
+                    self.settings.append(default)
+                    settings_db.db_insert_setting(default)
+
+            #Init maybe useful variables
+            self.channel=channel
+            self.username=username
+            
             #Set up up util for easy use of commandnames in privmsg and whisper
             self.privmsg_commands={}
             self.whisper_commands={}
             
             #Set up TwitchApi
-            self.twitch_api=twitchapi.TwitchApi()
+            self.twitch_api=TwitchApi()
             
             #Set up CommandsHelper
             self.commands_helper=CommandsHelper()
             self.irc.messagespreader.add(self.commands_helper.privmsg_listener)
             self.irc.whisperspreader.add(self.commands_helper.whisper_listener)
+
+            dictsettings=defaultdict(dict)
+            for setting in self.settings:
+                dictsettings[setting.module][setting.key]=setting.value
             
-            #Set up and load all components
-            self.components={}
-            comps=component_config['components']
-            for comp in comps.keys():
-                if comps[comp]['active'] == True:
-                    if 'config' in comps[comp]:
-                        conf = comps[comp]['config']
-                    else:
-                        conf={}
-                    try:
-                        mod = importlib.import_module('components.'+comp)
-                        comp_inst=mod.Component(self, conf)
-                        self.components[comp]=comp_inst
-                        comp_inst.load()
-                        print('successfully loaded component '+comp)
-                    except Exception as e:
-                        print('Error loading module '+comp+':\n',e)
-            
-            #Database connection:
-            self.database=db_helper
-            
+            #Set up the Components
+            for compname, component in self.components.items():
+                if dictsettings[compname]['active']=='1':
+                    print('loaded '+compname)
+                    component.load(dictsettings[compname])
+                else:
+                    print('component {} is not active'.format(compname))
+
             #Join the specified channel and start the connection
             self.irc.create_connection()
             self.irc.join(channel)

@@ -7,14 +7,15 @@ class Component(_EC):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+           
+    def load(self,config):
         db_create_command_table()
         self.commands=set()
         for command in db_get_all_commands():
             self.commands.add(command.name)
             self.bot.commands_helper._add_privmsg_command(command.to_privmsg_command(self.irc))
         db_helper.add_db_change_listener(self.cmd_reload)
-    
-    def load(self):
+
         def addcmd(username, channel, message, tags):
             parts=message.split(' ',1)
             if len(parts)!=2:
@@ -139,6 +140,12 @@ class Component(_EC):
         for commandname in self.commands:
             self.bot.unregister_privmsg_command(commandname)
         self.commands.clear()
+
+    def get_default_settings(self):
+        return {}
+
+    def on_change_settings(self, keys, settings):
+        pass
     
     def cmd_reload(self):
         """

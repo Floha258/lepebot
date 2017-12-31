@@ -12,11 +12,10 @@ class Component(_EC):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(self.config)
-        self.default_param=self.config['default-param']
-        self.default_user=getusercached(self.config['default-username'])
-    
-    def load(self):
+            
+    def load(self,config):
+        self.default_param=config['default-param']
+        self.default_user=getusercached(config['default-username'])
         def wr(channel, username, tags, message):
             self.irc.sendprivmsg(channel,self.getwrstr(message))
         self.bot.register_privmsg_command('wr',wr)
@@ -64,7 +63,7 @@ class Component(_EC):
         if len(params)==0:
             gameparams=self.default_param
             user=self.default_user
-            if len(gameparams)==0 or len(user)==0:
+            if len(gameparams)==0 or user==None:
                 return "No PB found"
         else:
             splitparams=params.split(' ',1)
@@ -122,6 +121,12 @@ class Component(_EC):
         self.bot.unregister_privmsg_command('sruser')
         self.bot.unregister_privmsg_command('srvars')
 
+    def get_default_settings(self):
+        return {}
+
+    def on_change_settings(self, keys, settings):
+        pass
+    
 class Variable:
     def __init__(self, data):
         self.name=data["name"].lower()

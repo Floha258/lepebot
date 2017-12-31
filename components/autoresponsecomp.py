@@ -39,13 +39,19 @@ class Component(_EC):
         self.msglistener=_msglistener
         db_helper.add_db_change_listener(self.regres_reload)
 
-    def load(self):
+    def load(self,config):
         db_helper.execute(CREATE_TABLE_STATEMENT)
         self.regres=db_get_all()
         self.irc.messagespreader.add(self.msglistener)
     
     def unload(self):
         self.irc.messagespreader.remove(self.msglistener)
+
+    def get_default_settings(self):
+        return {}
+
+    def on_change_settings(self, keys, settings):
+        pass
     
     def regres_reload(self):
         self.regres=db_get_all()

@@ -6,9 +6,8 @@ class Component(_EC):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(self.config)
     
-    def load(self):
+    def load(self,config):
         def msglistener(channel, username, message, tags):
             num=None
             try:
@@ -26,7 +25,12 @@ class Component(_EC):
     def unload(self):
         self.bot.unregister_privmsg_command('fact')
 
+    def get_default_settings(self):
+        return {}
 
+    def on_change_settings(self, keys, settings):
+        pass
+    
 
 #def whisperlistener(username, message, tags):
 #    if username=='lepelog':

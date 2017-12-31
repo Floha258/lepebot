@@ -9,7 +9,7 @@ class Component(_EC):
         super().__init__(*args, **kwargs)
         self.stop_event=threading.Event()
     
-    def load(self):
+    def load(self,config):
         self.stop_event.clear()
         try:
             raw_follows=self.bot.twitch_api.getfollowers(twitch_id,10)
@@ -43,6 +43,12 @@ class Component(_EC):
     
     def unload(self):
         self.stop_event.set()
+        
+    def get_default_settings(self):
+        return {}
+
+    def on_change_settings(self, keys, settings):
+        pass
     
     def process_change(self, old, new):
         #Try to find one of the old id's in the new follower list
