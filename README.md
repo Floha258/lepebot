@@ -20,8 +20,10 @@ Install all required packages with `pip3 install -r requirements.txt`. If you do
 There seems to be a problem installing watchdogs on windows, because PyYAML can't be installed [this should help](https://stackoverflow.com/questions/33665181/how-to-install-pyyaml-on-windows-10)
 
 Copy the folder example_config and rename it to config.
-### component_config
-This config specifies which components are loaded and also sets the config for the components. More about components below. If 'active' is set to `True` the component is loaded, otherwise it isn't.
+### component_config (DEPRECATED)
+This config specifies which components are loaded and also sets the config for the components. More about components below. If 'active' is set to `True` the component is loaded, otherwise it isn't.  
+Note: This is deprecated, settings should be changed in the `bot.db` directly (created after first start)  
+The `active` key is responsible for loading the module, so its value has to be set to 1 to load the specified module.
 ### twitch_confg
 This config contains all important private information to let the bot connect to the twitch chat and interact with the twitch-api.  
 `username`: username of you bots twitch-account  
