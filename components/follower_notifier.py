@@ -47,7 +47,7 @@ class Component(_EC):
     def get_default_settings(self):
         return {}
 
-    def on_change_settings(self, keys, settings):
+    def on_update_settings(self, keys, settings):
         pass
     
     def process_change(self, old, new):

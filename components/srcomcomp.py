@@ -2,6 +2,7 @@ import requests
 from datetime import timedelta
 from .empty_component import EmptyComponent as _EC
 from util import format_time
+import settings_db
 
 #gameabbreviation:Game
 gamecache={}
@@ -27,9 +28,11 @@ class Component(_EC):
         self.bot.register_privmsg_command('searchgame',gamesearch)
         def srcurrent(channel, username, tags, message):
             self.default_param=message
+            settings_db.db_update_setting(settings_db.Setting('srcomcomp','default-param',message))
         self.bot.register_privmsg_command('srcurrent',srcurrent,mod_only=True)
         def sruser(channel, username, tags, message):
             self.default_user=getusercached(message)
+            settings_db.db_update_setting(settings_db.Setting('srcomcomp','default-username',message))
         self.bot.register_privmsg_command('sruser',sruser,mod_only=True)
         def srvars(channel, username, tags, message):
             self.irc.sendprivmsg(channel, self.getvarsstring(message))
@@ -122,10 +125,13 @@ class Component(_EC):
         self.bot.unregister_privmsg_command('srvars')
 
     def get_default_settings(self):
-        return {}
+        return {'default-username':'yourspeedrundotcomusername','default-param':'botw all dungeons;amiibo:no amiibo'}
 
-    def on_change_settings(self, keys, settings):
-        pass
+    def on_update_settings(self, keys, settings):
+        if 'default-param' in keys:
+            self.default_param=settings['default-param']
+        if 'default-username' in keys:
+            self.default_user=getusercached(settings['default-username'])
     
 class Variable:
     def __init__(self, data):

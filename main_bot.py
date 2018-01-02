@@ -92,9 +92,7 @@ if __name__=='__main__':
             self.irc.messagespreader.add(self.commands_helper.privmsg_listener)
             self.irc.whisperspreader.add(self.commands_helper.whisper_listener)
 
-            dictsettings=defaultdict(dict)
-            for setting in self.settings:
-                dictsettings[setting.module][setting.key]=setting.value
+            dictsettings=Lepebot.settingslist_to_dict(self.settings)
             
             #Set up the Components
             for compname, component in self.components.items():
@@ -107,6 +105,9 @@ if __name__=='__main__':
             #Join the specified channel and start the connection
             self.irc.create_connection()
             self.irc.join(channel)
+
+            #Register database change hook
+            db_helper.add_db_change_listener(self._databaseupdate)
 
         def register_privmsg_command(self, name, func, channel_cooldown=0, user_cooldown=0, mod_only=False, broadcaster_only=False, enabled=True):
             """
@@ -150,6 +151,32 @@ if __name__=='__main__':
                     print('Error unloading module '+name+':\n',e)
             self.irc.shutdown()
             self.database.close()
+
+        @staticmethod
+        def settingslist_to_dict(settingslist):
+            dictsettings=defaultdict(dict)
+            for setting in settingslist:
+                dictsettings[setting.module][setting.key]=setting.value
+            return dictsettings
             
+        def _databaseupdate(self):
+            newsettings=settings_db.db_select_all()
+            settingsdiff=settings_db.generate_diff(self.settings,newsettings)
+            if len(settingsdiff)==0:
+                return
+            self.settings=newsettings
+            changedsettings=(set_tup[1] for set_tup in settingsdiff if not set_tup[1] is None)
+            settingsdict=Lepebot.settingslist_to_dict(changedsettings)
+            for modname, settings in settingsdict.items():
+                if 'active' in settings:
+                    if settings['active']=='1':
+                        #component is now active! Get all settings from this module and load it
+                        compsettings=Lepebot.settingslist_to_dict(settings_db.db_select_for_module(modname))
+                        self.components[modname].load(compsettings[modname])
+                    else:
+                        #unload component
+                        self.components[modname].unload()
+                else:
+                    self.components[modname].on_update_settings(settings.keys(),settings)
             
     bot=Lepebot()
