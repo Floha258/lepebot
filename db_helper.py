@@ -70,6 +70,20 @@ def execute(*args):
             print('executing',args)
         db.execute(*args)
 
+def execute_return_id(*args):
+    """
+    Execute a sqlite query on the database and return the last
+    inserted row id
+    See the sqlite3 python documentation of execute for more information
+    """
+    with db_lock:
+        if debug:
+            print('executing while returning id',args)
+        tempcurs = db.execute(*args)
+        rowid = tempcurs.lastrowid
+        tempcurs.close()
+        return rowid
+
 def fetchall(*args):
     """
     Execute a sqlite query on the database
