@@ -10,8 +10,8 @@ Everything is running locally
 - Display Information about twitch-videos posted in chat
 - Answer questions automatically (based on regex), this is also pretty nice for memes
 - Display messages every x seconds
+- Add/remove quotes (mod only), display random quotes for everyone
 - TODO: Purge shortened links automatically
-- TODO: Add/remove/approve quotes, get random quotes
 - TODO: Display information about youtube-videos posted in chat
 
 # Installation
@@ -63,6 +63,9 @@ Commands, that are added to the `commands_helper` of the bot, calling functions 
 - !setcmdbroadcasteronly [name] [0 or 1] ([mod only] set command broadcaster-only, 1 is yes)
 - !setcmdenabled [name] [0 or 1] ([mod only] enable/disable command, 1 is enabled)
 - !delcmd [name] ([mod only] delete the command)
+- !addquote [quote] ([mod only]Add a new quote, for example: !addquote "this is a quote" - somebody)
+- !delquote [quoteid] ([mod only] Delete a quote by its ID)
+- !quote [quoteid] (Get the specified quote by the ID or a random quote if no ID is given)
 
 # Components
 Some components store additional information in the database, you can edit this file (`bot.db`) with a sqlite program. When saving changes, the bot reloads all information in the database.
@@ -92,3 +95,6 @@ Columns:
 - `regex` valid python regex that is checked
 - `response` message that is send in the channel if the regex matches
 - `cooldown` add a cooldown to the response
+
+## quotescomp
+Save and display random quotes, you can specify a cooldown with the `cooldown` setting in the database. The quotes are stored in the `quotes` table in the database.

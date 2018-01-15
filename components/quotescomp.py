@@ -2,6 +2,7 @@
 from .empty_component import EmptyComponent as _EC
 import db_helper
 import datetime
+import random
 
 
 class Component(_EC):
@@ -10,10 +11,11 @@ class Component(_EC):
         super().__init__(*args, **kwargs)
 
     def load(self, config):
+        db_create_table()
         try:
             self.cooldown = int(config['cooldown'])
         except ValueError:
-            self.cooldown=20
+            self.cooldown = 20
 
         def _addquote(channel, username, tags, message):
             daynow = '{0:%d.%m.%Y}'.format(datetime.datetime.now())
@@ -31,7 +33,6 @@ class Component(_EC):
             except ValueError:
                 self.bot.irc.sendprivmsg(self.bot.channel,
                                          'Not a valid number')
-                return
             db_delete_quote(quotenum)
             self.bot.irc.sendprivmsg(self.bot.channel,
                     'Succesfully deleted quote #{}'.format(quotenum))
@@ -39,8 +40,15 @@ class Component(_EC):
                                           mod_only=True, enabled=True)
 
         def _randquote():
-            # TODO
-            return 'TODO'
+            quotecount = db_helper.fetchall(
+                'SELECT COUNT(*) FROM `quotes`')[0][0]
+            if quotecount == 0:
+                return 'No quotes found'
+            # Get the quote at a specific position
+            quote = Quote.from_db_row(db_helper.fetchall(
+                'SELECT * FROM `quotes` LIMIT 1 OFFSET ?',
+                (random.randrange(0, quotecount),))[0])
+            return _presentquote(quote)
 
         def _presentquote(quote):
             return '{} [{}]'.format(quote.quote, quote.date)
