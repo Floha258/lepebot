@@ -51,14 +51,17 @@ class Component(_EC):
             return 'Game not found'
         if cat == None:
             return 'Availiable categories are: '+', '.join(cate.name for cate in game.categories)
-        name, time=getwr(game.id, cat.id, varis)
-        if name==None:
+        names, time=getwr(game.id, cat.id, varis)
+        if names==None:
             return 'No record'
         varstring=','.join(var.name+':'+val[1] for var, val in varis)
         if varstring != '':
             varstring='('+varstring+')'
-        return 'The wr for '+game.name+': '+cat.name+' '+varstring+' is '+time+' by '+name
-        return 'The wr for {}: {} {} is {} by {}'.format(game.name, cat.name, varstring, time, name)
+        if len(names)==1:
+            return 'The wr for {}: {} {} is {} by {}'.format(game.name, cat.name, varstring, time, names[0])
+        else:
+            return 'The wr for {}: {} {} is {} ({}-way tie)'.format(
+                game.name, cat.name, varstring, time, len(names))
     
     def getpbstr(self, params):
         """Returns the pbstring for the given command"""
@@ -271,7 +274,7 @@ def getwr(gameid, categoryid, variables):
         categoryid (str): ID of the category
         variables (list of (Variable, (valueid, valuename))): Variables to include, can be an empty list
     Returns:
-        name(str), time(str)
+        names(list(str)), time(str)
         Name of the runner and the time
     """
     varstring=''
@@ -287,11 +290,14 @@ def getwr(gameid, categoryid, variables):
     time=run['times']['primary_t']
     formated_time=format_time(time)
     player=data['players']['data'][0]
-    if player['rel']=='guest':
-        name=player['name']
-    else:
-        name=player['names']['international']
-    return name, formated_time
+
+    def player_to_name(player):
+        if player['rel'] == 'guest':
+            return player['name']
+        else:
+            return player['names']['international']
+    names=list(map(player_to_name, data['players']['data']))
+    return names, formated_time
 
 def getpbs(userid, gameid, catid, varis):
     """
