@@ -105,7 +105,10 @@ if __name__ == '__main__':
             for compname, component in self.components.items():
                 if dictsettings[compname]['active'] == '1':
                     print('loaded '+compname)
-                    component.load(dictsettings[compname])
+                    try:
+                        component.load(dictsettings[compname])
+                    except Exception as e:
+                        print('Exception while loading {}: {}'.format(compname, e))
                 else:
                     print('component {} is not active'.format(compname))
 
