@@ -93,6 +93,13 @@ if __name__ == '__main__':
             
             # Set up TwitchApi
             self.twitch_api = TwitchApi()
+            if self.twitch_api.twitch_id == '':
+                user = self.twitch_api.get_user(self.channel)
+                if user is None:
+                    raise Exception('Channel {} doesn\'t exist',
+                                    self.channel)
+                self.twitch_api.twitch_id = user['_id']
+                print('Your twitch_id is {}, please insert it in the twitch_config.py in twitch_id'.format(self.twitch_api.twitch_id))
 
             # Set up CommandsHelper
             self.commands_helper = CommandsHelper()
