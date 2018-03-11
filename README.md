@@ -44,8 +44,8 @@ Commands, that only return a text in the channel (with {username} and {channel} 
 
 Commands, that are added to the `commands_helper` of the bot, calling functions and doing real actions.
 
-- !wr [gameabbreviation] [category] [;variablename:value] (get the current world record for a game listed on speedrun.com)
-- !pb [username] [gameabbreviation] [category] [;variablename:value] (get the pb of the given user by game, category and subcategories defined by the variables)
+- !wr [param] (get the current world record for a game (more info below) listed on speedrun.com)
+- !pb [username] [param] (get the pb of the given user by game, category and subcategories defined by the variables)
 - !searchgame [game] (searches speedrun.com for abbreviation for the given game to use with the wr command)
 - !srcurrent [param] ([mod only] set the current default params for the wr command if it is used without params)
 - !sruser [username] ([mod only] set the current default username for the pb command)
@@ -66,6 +66,13 @@ Commands, that are added to the `commands_helper` of the bot, calling functions 
 - !addquote [quote] ([mod only]Add a new quote, for example: !addquote "this is a quote" - somebody)
 - !delquote [quoteid] ([mod only] Delete a quote by its ID)
 - !quote [quoteid] (Get the specified quote by the ID or a random quote if no ID is given)
+
+### wr/pb params
+There are 2 kinds of leaderboards, one for full game and one for individual levels. They have a different syntax:
+
+For full game use `[gameabbreviation] [categoryname](;[variablename]:[variablevalue])`, variables are optional and adding more ;-separated variables is possible
+
+For level runs use `[gameabbreviation];[levelname];[categoryname](;[variablename]:[variablevalue])`
 
 # Components
 Some components store additional information in the database, you can edit this file (`bot.db`) with a sqlite program. When saving changes, the bot reloads all information in the database.
