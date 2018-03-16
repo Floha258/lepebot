@@ -46,7 +46,7 @@ class TwitchApi:
             if self.oauthexpiring < time.time()+10:
                 save_token(
                     self.oauth.refresh_token(self.oauth.auto_refresh_url))
-                self.oauthexpiring = time.time()
+                self.oauthexpiring = time.time()+3600
             headers['Authorization'] = 'OAuth ' + self.oauth.access_token
         headers.update(other_headers)
         return headers
