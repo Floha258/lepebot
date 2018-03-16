@@ -1,41 +1,57 @@
-from config.twitch_config import twitch_client_id, twitch_client_secret, oauth_token, twitch_id
+from config.twitch_config import twitch_client_id, twitch_client_secret, twitch_id
 import requests
 import json
+import settings_db
+import time
+from requests_oauthlib import OAuth2Session
+
+def save_token(token):
+    settings_db.db_replace_setting(settings_db.Setting(
+        'main','oauth_token', json.dumps(token)))
+
+"""Raised if there was an Error during the api init"""
+class ApiInitError(Exception):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
 
 class TwitchApi:
 
-    def __init__(self,secret=None,token=None):
-        self.client_id=twitch_client_id
-        self.client_secret=twitch_client_secret
-        self.oauth_token=oauth_token
-        self.twitch_id=twitch_id
-        self.twitch_base_url='https://api.twitch.tv/kraken/'
-        
+    def __init__(self):
+        self.client_id = twitch_client_id
+        self.client_header = {'Client-ID': self.client_id}
+        self.client_secret = twitch_client_secret
+        self.twitch_id = twitch_id
+        self.twitch_base_url = 'https://api.twitch.tv/kraken/'
+
+        token_setting = settings_db.db_select_for_module_key(
+            'main', 'oauth_token')
+        if token_setting is None:
+            raise ApiInitError('No Oauth Token found, please generate one using oauth_generator.py')
+        token = json.loads(token_setting.value)
+        self.oauth = OAuth2Session(self.client_id, token=token,
+            auto_refresh_kwargs={'client_id':self.client_id,
+                                 'client_secret':self.client_secret},
+            auto_refresh_url='https://id.twitch.tv/oauth2/token')
+        self.oauthexpiring=time.time()-1
+
     def get_headers(self, auth=False, other_headers={}):
         """Returns all header for making a successfull request to the twitch api
         Param:
             auth (bool): if authorization is required"""
         headers={'Client-ID':self.client_id, 'Accept':'application/vnd.twitchtv.v5+json'}
         if auth:
-            headers['Authorization']='OAuth '+self.oauth_token
+            # ckeck if token is expired/expiring soon
+            if self.oauthexpiring < time.time()+10:
+                save_token(
+                    self.oauth.refresh_token(self.oauth.auto_refresh_url))
+                self.oauthexpiring = time.time()
+            headers['Authorization'] = 'OAuth ' + self.oauth.access_token
         headers.update(other_headers)
         return headers
+        
     
-    def generate_oauth_url(self):
-        """
-        Generates an url to copy in your browser. If you visit this side, twitch will ask you
-        to verify that you want to give your own applications these priviledges.
-        After you click accept you get redirected to localhost
-        (This will most likely result in a not found)
-        Now you have to copy the string between "code=" and "&scopes" and insert it to
-        the "get_oauth_for_token"-method of this class. The result is the oauth_token
-        you need to store in you twitch_config.py
-        """
-        return "https://api.twitch.tv/kraken/oauth2/authorize?client_id={clientid}&redirect_uri=http://localhost&response_type=code&scope=channel_editor+chat_login".format(clientid=self.client_id)
-        
-    def get_oauth_from_token(self,token):
-        return requests.post("https://api.twitch.tv/kraken/oauth2/token?client_id={clientid}&client_secret={clientsecret}&code={token}&grant_type=authorization_code&redirect_uri=http://localhost".format(clientid=self.client_id,clientsecret=self.client_secret,token=token)).json()['access_token']
-        
     def search_game(self, query):
         """
         Returns one matching game or None if twitch couldn't find one

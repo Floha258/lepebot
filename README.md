@@ -27,11 +27,14 @@ The `active` key is responsible for loading the module, so its value has to be s
 ### twitch_confg
 This config contains all important private information to let the bot connect to the twitch chat and interact with the twitch-api.  
 `username`: username of you bots twitch-account  
-`oauth_token`: token to connect to the twitchchat and api. There is a oath-generator for twitch, that can generate a chat-only token, but make sure to not include the `oauth:`-prefix. `twitchapi.py` has some util methods to generate a token that can also be used for the twitch api  
 `twitch_client_id`: To make requests to the twitch api, you need to register a application in your twitch settings under connections, click `Register your application`. The url should be set to localhost, the name doesn't matter  
 `twitch_client_secret`: Client secret of you registered application  
 `channel`: Channel, the bot should join  
 `twitch_id`: Id of the channel, is displayed at startup if left blank
+
+Then you have to execute oauth_generator in the console and follow the instructions, make sure that you are logged in on twitch with your bots account cause it will generate the login for the chat for whoever is logged in
+
+If you want to update your title and game with the bot make sure to add your bot to the channel editors in your twitch settings
 
 # Startup
 change to this directory and run `main_bot.py`, if you want to enabled debug output, set the environmentvariable `DEBUG` to 1

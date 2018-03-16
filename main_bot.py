@@ -1,6 +1,6 @@
 #!/usr/bin/python3 -i
 
-from config.twitch_config import username, oauth_token, channel
+from config.twitch_config import username, channel
 # component config file is deprecated
 try:
     from config.component_config import config as component_config
@@ -36,14 +36,25 @@ if __name__ == '__main__':
             settings_db.db_create_table()
             self.settings = settings_db.db_select_all()
 
+            # Set up TwitchApi
+            self.twitch_api = TwitchApi()
+            if self.twitch_api.twitch_id == '':
+                user = self.twitch_api.get_user(self.channel)
+                if user is None:
+                    raise Exception('Channel {} doesn\'t exist',
+                                    self.channel)
+                self.twitch_api.twitch_id = user['_id']
+                print('Your twitch_id is {}, please insert it in the twitch_config.py in twitch_id'.format(self.twitch_api.twitch_id))
+
             # create main instance of the ircConnection
             if self.mock:
                 # TODO
-                self.irc = MockIrcClient(username, oauth_token,
+                self.irc = MockIrcClient(username, 'mock',
                                          debug=self.debug)
             else:
-                self.irc = TwitchIrcClient(username, "oauth:"+oauth_token,
-                                           debug=self.debug)
+                self.irc = TwitchIrcClient(username,
+                    "oauth:"+self.twitch_api.oauth.token['access_token'],
+                    debug=self.debug)
 
             # Detect all components in the component directory
             # (but not the default empty component)
@@ -90,16 +101,6 @@ if __name__ == '__main__':
             # Set up up util for easy use of commandnames in privmsg and whisper
             self.privmsg_commands = {}
             self.whisper_commands = {}
-            
-            # Set up TwitchApi
-            self.twitch_api = TwitchApi()
-            if self.twitch_api.twitch_id == '':
-                user = self.twitch_api.get_user(self.channel)
-                if user is None:
-                    raise Exception('Channel {} doesn\'t exist',
-                                    self.channel)
-                self.twitch_api.twitch_id = user['_id']
-                print('Your twitch_id is {}, please insert it in the twitch_config.py in twitch_id'.format(self.twitch_api.twitch_id))
 
             # Set up CommandsHelper
             self.commands_helper = CommandsHelper()

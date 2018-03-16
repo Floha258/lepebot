@@ -12,6 +12,8 @@ class Component(_EC):
             response=self.bot.twitch_api.set_game(self.bot.twitch_api.twitch_id, message)
             if response.status_code==200:
                 self.irc.sendprivmsg(channel, 'Updated Game')
+            else:
+                print('Error:', response.text)
                     
         self.bot.register_privmsg_command('setgame',setgame, mod_only=True)
         def getgame(username, message, channel, tags):
@@ -25,6 +27,8 @@ class Component(_EC):
             response=self.bot.twitch_api.set_title(self.bot.twitch_api.twitch_id, message)
             if response.status_code==200:
                 self.irc.sendprivmsg(channel, 'Updated Title')
+            else:
+                print('Error:', response.text)
                     
         self.bot.register_privmsg_command('settitle',settitle, mod_only=True)
         def gettitle(username, message, channel, tags):
@@ -40,11 +44,15 @@ class Component(_EC):
                 response = self.bot.twitch_api.set_community(self.bot.twitch_api.twitch_id, found_community['_id'])
                 if response.status_code==204:
                     self.irc.sendprivmsg(channel, 'Updated Community')
+                else:
+                    print('Error:', response.text)
         self.bot.register_privmsg_command('setcommunity',setcommunity, mod_only=True)
         def removecommunity(username, message, channel, tags):
             response = self.bot.twitch_api.remove_community(self.bot.twitch_api.twitch_id)
             if response.status_code==204:
                 self.irc.sendprivmsg(channel, 'Removed Community')
+            else:
+                print('Error:', response.text)
         self.bot.register_privmsg_command('removecommunity',removecommunity, mod_only=True)
         def uptime(username, message, channel, tags):
             stream = self.bot.twitch_api.get_stream(self.bot.twitch_api.twitch_id)
