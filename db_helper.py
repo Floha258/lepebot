@@ -15,10 +15,6 @@ debug=bool(os.getenv('DEBUG'))
 db=sqlite3.connect('bot.db', check_same_thread=False)
 db_change_listeners=[]
 
-def pr():
-    print('testestest')
-
-db_change_listeners.append(pr)
 _last_total_changes=0
 #Set to true if changes were committed to the database, causing a file change
 _expect_file_change=False
