@@ -44,14 +44,16 @@ class TwitchApi:
         if auth:
             # ckeck if token is expired/expiring soon
             if self.oauthexpiring < time.time()+10:
-                save_token(
-                    self.oauth.refresh_token(self.oauth.auto_refresh_url))
-                self.oauthexpiring = time.time()+3600
+                self.refresh_oauth_token()
             headers['Authorization'] = 'OAuth ' + self.oauth.access_token
         headers.update(other_headers)
         return headers
-        
-    
+
+    def refresh_oauth_token(self):
+        save_token(
+            self.oauth.refresh_token(self.oauth.auto_refresh_url))
+        self.oauthexpiring = time.time()+3600
+
     def search_game(self, query):
         """
         Returns one matching game or None if twitch couldn't find one

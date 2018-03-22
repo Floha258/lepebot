@@ -38,6 +38,7 @@ if __name__ == '__main__':
 
             # Set up TwitchApi
             self.twitch_api = TwitchApi()
+            self.twitch_api.refresh_oauth_token()
             if self.twitch_api.twitch_id == '':
                 user = self.twitch_api.get_user(self.channel)
                 if user is None:
@@ -194,6 +195,11 @@ if __name__ == '__main__':
                     else:
                         # unload component
                         self.components[modname].unload()
+                elif modname == 'main':
+                    # TODO, this is for the main component and currently
+                    # not used, only for the oauth tokens which shouldn't
+                    # be updated externally
+                    pass
                 else:
                     self.components[modname].on_update_settings(settings.keys(),settings)
             
