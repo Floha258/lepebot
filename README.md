@@ -27,7 +27,7 @@ The `active` key is responsible for loading the module, so its value has to be s
 ### twitch_confg
 This config contains all important private information to let the bot connect to the twitch chat and interact with the twitch-api.  
 `username`: username of you bots twitch-account  
-`twitch_client_id`: To make requests to the twitch api, you need to register a application in your twitch settings under connections, click `Register your application`. The url should be set to localhost, the name doesn't matter  
+`twitch_client_id`: To make requests to the twitch api, you need to register a application in twitch [here](https://dev.twitch.tv/dashboard/apps/create). The url should be set to localhost, the name doesn't matter  
 `twitch_client_secret`: Client secret of you registered application  
 `channel`: Channel, the bot should join  
 `twitch_id`: Id of the channel, is displayed at startup if left blank
