@@ -175,13 +175,13 @@ class Component(_EC):
 class Variable:
 
     def __init__(self, data):
-        self.name=data["name"].lower()
+        self.name=data["name"]
         self.id=data["id"]
         self.default=data["values"]["default"]
         self.scope=data["scope"]["type"]
         self.subcategory=data['is-subcategory']
         self.category=data["category"]
-        self.values=[(value[0],value[1]['label'].lower()) for value in data["values"]["values"].items()]
+        self.values=[(value[0],value[1]['label']) for value in data["values"]["values"].items()]
     
     def __repr__(self):
         return self.name+'('+self.id+')'+' '+str(self.values)
@@ -190,14 +190,14 @@ class Variable:
 class Category:
 
     def __init__(self, data):
-        self.name=data["name"].lower()
+        self.name=data["name"]
         self.id=data["id"]
         self.variables=[]
 
 class Level:
 
     def __init__(self, data):
-        self.name = data["name"].lower()
+        self.name = data["name"]
         self.id = data["id"]
         self.categories = []
         self.variables = []
@@ -208,7 +208,7 @@ class Game:
     def __init__(self, data):
         self.name=data["names"]["international"]
         self.id=data["id"]
-        self.abbreveation=data["abbreviation"].lower()
+        self.abbreveation=data["abbreviation"]
         self.categories = []
         self.levelcategories = []
         for catdata in data["categories"]['data']:
@@ -311,7 +311,7 @@ def parse_game_cat_var_cached(toparse):
     split=split[1].split(";")
     catname=split[0]
     for cat in game.categories:
-        if cat.name.lower()==catname.lower():
+        if cat.name.casefold()==catname.casefold():
             category=cat
             break
     else:
@@ -320,8 +320,8 @@ def parse_game_cat_var_cached(toparse):
     variables=list()
     for varpart in split[1:]:
         varname, varvalue = varpart.split(':')
-        varname=varname.strip().lower()
-        varvalue=varvalue.strip().lower()
+        varname=varname.strip()
+        varvalue=varvalue.strip()
         found=_varsearch(game.variables, varname, varvalue)
         if found != None:
             variables.append(found)
@@ -355,22 +355,22 @@ def parse_game_level_cat_var_cached(toparse):
     if len(splitted) >= 2:
         levelname = splitted[1]
         for gamelevel in game.levels:
-            if gamelevel.name == levelname:
+            if gamelevel.name.casefold() == levelname.casefold():
                 level = gamelevel
         if level == None:
             return game, None, None, None
     if len(splitted) >= 3:
         catname = splitted[2]
         for levelcat in game.levelcategories:
-            if levelcat.name == catname:
+            if levelcat.name.casefold() == catname.casefold():
                 category = levelcat
         if category == None:
             return game, level, None, None
     if len(splitted) >= 4:
         for varpart in splitted[3:]:
             varname, varvalue = varpart.split(':')
-            varname=varname.strip().lower()
-            varvalue=varvalue.strip().lower()
+            varname=varname.strip()
+            varvalue=varvalue.strip()
             found=_varsearch(game.variables, varname, varvalue)
             if found != None:
                 variables.append(found)
@@ -500,9 +500,9 @@ def getlevelpb(userid, gameid, levelid, catid, varis):
 
 def _varsearch(varis, varname, varvalue):
     for var in varis:
-        if var.name==varname:
+        if var.name.casefold()==varname.casefold():
             for val in var.values:
-                if val[1]==varvalue:
+                if val[1].casefold()==varvalue.casefold():
                     return (var, val)
     return None
 

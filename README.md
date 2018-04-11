@@ -98,7 +98,7 @@ Columns:
 - `looptime` intervall in seconds when to send the message again and again
 - `enabled` 0 means disabled, 1 means enabled
 
-## regexresponse
+## autoresponsecomp
 Send a message in the chat if a message matched a regex, stored in the database, table `regexresponse`. The regex may be any valid python-regex.  
 Columns:
 
