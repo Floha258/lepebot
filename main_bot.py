@@ -29,6 +29,10 @@ if __name__ == '__main__':
             self.debug = bool(os.getenv('DEBUG'))
             self.mock = bool(os.getenv('MOCK'))
 
+            # Init maybe useful variables
+            self.channel = channel
+            self.username = username
+
             # Database connection:
             self.database = db_helper
 
@@ -94,10 +98,6 @@ if __name__ == '__main__':
                 if actual is None:
                     self.settings.append(default)
                     settings_db.db_insert_setting(default)
-
-            # Init maybe useful variables
-            self.channel = channel
-            self.username = username
 
             # Set up up util for easy use of commandnames in privmsg and whisper
             self.privmsg_commands = {}
