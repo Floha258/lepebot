@@ -181,7 +181,7 @@ class Component(_EC):
     def set_response(self, name, response):
         if db_get_command(name) == None:
             return False
-        self.bot.commands_helper.privmsg_commands[name].func=lambda username, channel, message, tags:self.irc.sendprivmsg(channel,response.format(channel=channel, username=username))
+        self.bot.commands_helper.privmsg_commands[name].func=Command._getprivmsgfunc(self.irc, response)
         db_set_response(name, response)
         return True
 
@@ -249,10 +249,11 @@ class Command:
         return Command(t[0],t[1],t[2],t[3],t[4]==1,t[5]==1,t[6]==1)
     
     def to_privmsg_command(self,irc):
-        return PrivmsgCommand(self.name, self._getprivmsgfunc(irc, self.response),
+        return PrivmsgCommand(self.name, Command._getprivmsgfunc(irc, self.response),
             self.channel_cooldown, self.user_cooldown, self.mod_only, self.broadcaster_only, self.enabled)
 
-    def _getprivmsgfunc(self, irc, response):
+    @staticmethod
+    def _getprivmsgfunc(irc, response):
         """Returns a func for the response which can include placeholders
         for format, therefore a try catch is necessary"""
         def privmsgfunc(username, channel, message, tags):
