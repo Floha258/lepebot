@@ -83,7 +83,16 @@ Some components store additional information in the database, you can edit this 
 Component to display information about PBs, WRs, Games and Categories. In your config you can change the `default-param` to a string used by the !wr command (see above documentation for more detailed explanation about this) and `default-username` to your speedrun.com username.
 
 ## commandcomp
-See the Commands section above for information, simple commands (only response) are stored in a database, table `commands`.
+See the Commands section above for information, simple commands (only response) are stored in a database, table `commands`. Every `{channel}` is replaced by the channel, the bot is currently in, every `{username}` is replaced by the username of the person that called the command. You can add specific arguments by using `{}`, they are replaced in the order they are given when the command is called. Example, the response of the command `test` is `{username} used the arguments {} and {}!`
+
+````
+username: !test hello goodbye
+bot: username used the arguments hello and goodbye!
+username: !test hello goodbye bla bla
+bot: username used the arguments hello and goodbye!
+username: !test hello
+bot: Not enough arguments given!
+````
 
 ## follower_notifier
 Shout out all new followers

@@ -249,8 +249,20 @@ class Command:
         return Command(t[0],t[1],t[2],t[3],t[4]==1,t[5]==1,t[6]==1)
     
     def to_privmsg_command(self,irc):
-        return PrivmsgCommand(self.name, lambda username, channel, message, tags:irc.sendprivmsg(channel,self.response.format(channel=channel, username=username)),
+        return PrivmsgCommand(self.name, self._getprivmsgfunc(irc, self.response),
             self.channel_cooldown, self.user_cooldown, self.mod_only, self.broadcaster_only, self.enabled)
+
+    def _getprivmsgfunc(self, irc, response):
+        """Returns a func for the response which can include placeholders
+        for format, therefore a try catch is necessary"""
+        def privmsgfunc(username, channel, message, tags):
+            try:
+                result = response.format(channel=channel,
+                                username=username, *message.split())
+            except:
+                result = "Not enough arguments given!"
+            irc.sendprivmsg(channel, result)
+        return privmsgfunc
 
 CREATE_TABLE_STATEMENT='CREATE TABLE IF NOT EXISTS `commands` (`name` TEXT NOT NULL, `response` TEXT NOT NULL DEFAULT\'\', '\
     +'`channel_cooldown` INTEGER NOT NULL DEFAULT 0, `user_cooldown` INTEGER NOT NULL DEFAULT 0,'\
