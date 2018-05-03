@@ -67,7 +67,7 @@ class Component(_EC):
             names, time = getwr(game.id, cat.id, varis)
         if names is None:
             return 'No record'
-        varstring = ','.join(var.name+':'+val[1] for var, val in varis)
+        varstring = ', '.join(val[1] for var, val in varis)
         if varstring != '':
             varstring = ' ('+varstring+')'
         if len(names) == 1:
@@ -121,7 +121,7 @@ class Component(_EC):
             place, time = getpbs(user.id, game.id, cat.id, varis)
         if place is None:
             return 'No PB found'
-        varstring=','.join(var.name+':'+val[1] for var, val in varis)
+        varstring=', '.join(val[1] for var, val in varis)
         if varstring != '':
             varstring=' ('+varstring+')'
         if level is None:
