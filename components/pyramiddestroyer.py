@@ -27,7 +27,7 @@ class Component(_EC):
             self.message = settings['message']
 
     def pyramiddestroyer(self, channel, message, tags, username):
-        message = message.replace('.', '').replace('  ', ' ').strip()
+        message = message.replace('.', '').replace(',', '').replace('  ', ' ').strip()
         if username == self.lastuser and \
            (self.lastmessage+' '+self.lastmessage) == message:
             self.irc.sendprivmsg(channel,
