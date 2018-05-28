@@ -71,11 +71,11 @@ class Component(_EC):
         print(usernames)
         # check to not call out lurkers, shoutout only
         # people that have been active in chat
-        toshoutout = self.chatterlist.intersect(usernames)
+        toshoutout = self.chatterlist.intersection(usernames)
         if len(toshoutout) == 0:
             msg='Thanks for the follow <3 !'
             self.bot.irc.sendprivmsg(channel, msg)
-        if len(toshoutout) == 1:
+        elif len(toshoutout) == 1:
             msg='Thanks for the follow <3 '+toshoutout.pop()+'!'
             self.bot.irc.sendprivmsg(channel, msg)
             #print(msg)
