@@ -8,9 +8,11 @@ class Component(_EC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stop_event=threading.Event()
+        self.chatterlist=set()
     
     def load(self,config):
         self.stop_event.clear()
+        self.bot.irc.messagespreader.add(self._msglistener)
         try:
             raw_follows=self.bot.twitch_api.getfollowers(twitch_id,10)
             if raw_follows==None:
@@ -43,6 +45,7 @@ class Component(_EC):
     
     def unload(self):
         self.stop_event.set()
+        self.bot.irc.messagespreader.remove(self._msglistener)
         
     def get_default_settings(self):
         return {}
@@ -64,13 +67,24 @@ class Component(_EC):
                     break
     
     def shoutout(self,follows):
-        print(follows)
-        if len(follows)==1:
-            msg='Thanks for the follow <3 '+follows[0]['user']['name']+'!'
+        usernames=[follow['user']['name'] for follow in follows]
+        print(usernames)
+        # check to not call out lurkers, shoutout only
+        # people that have been active in chat
+        toshoutout = self.chatterlist.intersect(usernames)
+        if len(toshoutout) == 0:
+            msg='Thanks for the follow <3 !'
+            self.bot.irc.sendprivmsg(channel, msg)
+        if len(toshoutout) == 1:
+            msg='Thanks for the follow <3 '+toshoutout.pop()+'!'
             self.bot.irc.sendprivmsg(channel, msg)
             #print(msg)
         else:
-            names=', '.join(follow['user']['name'] for follow in follows)
+            names=', '.join(toshoutout)
             msg='Thanks for the follows <3 '+names+'!'
             self.bot.irc.sendprivmsg(channel, msg)
             #print(msg)
+
+
+    def _msglistener(self, channel, username, message, tags):
+        self.chatterlist.add(username)
