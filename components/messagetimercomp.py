@@ -75,10 +75,10 @@ class TimedMessage:
     
     @staticmethod
     def from_db_row(row):
-        return TimedMessage(id=row[0], message=row[1], inittime=row[2], looptime=row[3], enabled=row[4]==1)
+        return TimedMessage(id=row[0], message=row[1], inittime=row[2], looptime=row[3], enabled= (row[4] == 1))
 
 CREATE_TABLE_STATEMENT="CREATE TABLE IF NOT EXISTS `timedmessages` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,"\
-  +"`message` TEXT NOT NULL DEFAULT '', `inittime` INTEGER NOT NULL DEFAULT 0, `looptime` INTEGER NOT NULL DEFAULT 0)"
+  +"`message` TEXT NOT NULL DEFAULT '', `inittime` INTEGER NOT NULL DEFAULT 0, `looptime` INTEGER NOT NULL DEFAULT 0, `enabled` INTEGER NOT NULL DEFAULT 0)"
 
 SELECT_STATEMENT="SELECT * FROM `timedmessages` WHERE `id`=?"
 SELECT_ALL_STATEMENT="SELECT * FROM `timedmessages`"
