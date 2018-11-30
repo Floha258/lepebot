@@ -103,6 +103,7 @@ class Component(_EC):
             else:
                 return 'Wrong command usage!'
         level = None
+        # check if level info or full game
         if ';' in gameparams.split(' ', 1)[0]:
             game, level, cat, varis = parse_game_level_cat_var_cached(gameparams)
             if game is None:
@@ -131,12 +132,24 @@ class Component(_EC):
 
     def getvarsstring(self, params):
         #Var is not needed and ignored
-        game, cat, var = parse_game_cat_var_cached(params)
-        if game == None:
-            return 'Please specify a valid game'
-        availablevars=game.variables.copy()
-        if cat!=None:
-            availablevars.extend(cat.variables)
+        # check if level of full game is requested
+        if ';' in params.split(' ', 1)[0]:
+            # level
+            game, level, cat, varis = parse_game_level_cat_var_cached(params)
+            if game is None:
+                return 'game not found'
+            availablevars = game.variables.copy()
+            if not level is None:
+                availablevars.extend(level.variables)
+            if not cat is None:
+                availablevars.extend(cat.variables)
+        else:
+            game, cat, varis = parse_game_cat_var_cached(params)
+            if game is None:
+                return 'Game not found'
+            availablevars=game.variables.copy()
+            if cat!=None:
+                availablevars.extend(cat.variables)
         if len(availablevars)==0:
             return "No variables found"
         formattedvars=map(lambda var:'{} ({})'.format(var.name,', '.join(map(lambda val:val[1],var.values))), availablevars)
@@ -371,13 +384,21 @@ def parse_game_level_cat_var_cached(toparse):
             varname, varvalue = varpart.split(':')
             varname=varname.strip()
             varvalue=varvalue.strip()
-            found=_varsearch(game.variables, varname, varvalue)
+            found=_varsearch(category.variables, varname, varvalue)
             if found != None:
                 variables.append(found)
             else:
-                found=_varsearch(category.variables, varname, varvalue)
+                found=_varsearch(level.variables, varname, varvalue)
                 if found != None:
                     variables.append(found)
+                else:
+                    found=_varsearch(game.levelvariables, varname, varvalue)
+                    if found != None:
+                        variables.append(found)
+                    else:
+                        found=_varsearch(game.variables, varname, varvalue)
+                        if found != None:
+                            variables.append(found)
         return game, level, category, variables
     else:
         return game, level, category, []
