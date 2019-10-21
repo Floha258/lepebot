@@ -37,7 +37,7 @@ Then you have to execute oauth_generator in the console and follow the instructi
 If you want to update your title and game with the bot make sure to add your bot to the channel editors in your twitch settings
 
 # Startup
-change to this directory and run `main_bot.py`, if you want to enabled debug output, set the environmentvariable `DEBUG` to 1
+change to this directory and run `main_bot.py` with python3, if you want to enabled debug output, set the environmentvariable `DEBUG` to 1
 
 # Commands
 
