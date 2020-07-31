@@ -20,7 +20,7 @@ class Component(_EC):
         self.irc.messagespreader.remove(self.pyramiddestroyer)
 
     def get_default_settings(self):
-        return {'message': ':) '}
+        return {'message': 'No pyramids allowed in here SwiftRage  '}
 
     def on_update_settings(self, keys, settings):
         if 'message' in keys:

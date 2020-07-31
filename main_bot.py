@@ -1,6 +1,7 @@
 #!/usr/bin/python3 -i
 
 from config.twitch_config import username, channel
+
 # component config file is deprecated
 try:
     from config.component_config import config as component_config
@@ -14,8 +15,7 @@ import settings_db
 import importlib
 import os
 import glob
-from os.path import basename, isfile
-from collections import defaultdict
+from os.path import basename, isfile#
 
 if __name__ == '__main__':
     class Lepebot:
@@ -49,7 +49,8 @@ if __name__ == '__main__':
                     raise Exception('Channel {} doesn\'t exist',
                                     self.channel)
                 self.twitch_api.twitch_id = user['_id']
-                print('Your twitch_id is {}, please insert it in the twitch_config.py in twitch_id'.format(self.twitch_api.twitch_id))
+                print('Your twitch_id is {}, please insert it in the twitch_config.py in twitch_id'.format(
+                    self.twitch_api.twitch_id))
 
             # create main instance of the ircConnection
             if self.mock:
@@ -58,8 +59,8 @@ if __name__ == '__main__':
                                          debug=self.debug)
             else:
                 self.irc = TwitchIrcClient(username,
-                    "oauth:"+self.twitch_api.oauth.token['access_token'],
-                    debug=self.debug)
+                                           "oauth:" + self.twitch_api.oauth.token['access_token'],
+                                           debug=self.debug)
 
             # Detect all components in the component directory
             # (but not the default empty component)
@@ -69,34 +70,40 @@ if __name__ == '__main__':
 
             # Load components
             self.components = {}
-            defaultsettings = []
+            defaultsettings = dict()
             for compname in componentnames:
-                self.components[compname] = importlib.import_module('components.'+compname).Component(self)
-                defaultsettings.append(
-                    settings_db.Setting(compname, 'active','0'))
+                self.components[compname] = importlib.import_module('components.' + compname).Component(self)
+                settingsdictvalues = dict(value=0)
+                defaultsettings[compname] = settingsdictvalues
+                # defaultsettings.append(
+                # settings_db.Setting(compname, '0'))
                 for key, value in self.components[compname].get_default_settings().items():
-                    defaultsettings.append(
-                        settings_db.Setting(compname, key, value))
+                    compdict = dict()
+                    compdict[key] = value
+                    defaultsettings[compname] = compdict
+                    # defaultsettings.append(
+                    #    settings_db.Setting(compname, value))
 
             # Apply legacy settings file
             if component_config is not None:
-                filesettings = []
+                filesettings = dict()
                 for comp, setts in component_config['components'].items():
-                    filesettings.append(settings_db.Setting(comp, 'active', '1' if setts['active'] else '0'))
+                    filesettings[comp]['active'] = 1 if setts['active'] else 0
                     if 'config' in setts:
                         for key, value in setts['config'].items():
-                            filesettings.append(settings_db.Setting(comp, key, value))
+                            filesettings[comp][key] = value
                 difference = settings_db.generate_diff(self.settings, filesettings)
                 for actual, default in difference:
-                    if actual is None:
-                        self.settings.append(default)
-                        settings_db.db_insert_setting(default)
-                    
+                    settings_db.db_insert_setting(default)
+
             # Apply defaults
             difference = settings_db.generate_diff(self.settings, defaultsettings)
             for actual, default in difference:
                 if actual is None:
-                    self.settings.append(default)
+                    modulesettings = dict() if default.module not in self.settings else self.settings[default.module]
+                    modulesettings[default.key] = default.value
+                    self.settings[default.module] = modulesettings
+                    # self.settings.append(default)
                     settings_db.db_insert_setting(default)
 
             # Set up up util for easy use of commandnames in privmsg and whisper
@@ -108,14 +115,14 @@ if __name__ == '__main__':
             self.irc.messagespreader.add(self.commands_helper.privmsg_listener)
             self.irc.whisperspreader.add(self.commands_helper.whisper_listener)
 
-            dictsettings = Lepebot.settingslist_to_dict(self.settings)
+            # dictsettings = Lepebot.settingslist_to_dict(self.settings)
 
             # Set up the Components
             for compname, component in self.components.items():
-                if dictsettings[compname]['active'] == '1':
-                    print('loaded '+compname)
+                if self.settings[compname]['active'] == '1':
+                    print('loaded ' + compname)
                     try:
-                        component.load(dictsettings[compname])
+                        component.load(self.settings[compname])
                     except Exception as e:
                         print('Exception while loading {}: {}'.format(compname, e))
                 else:
@@ -126,9 +133,10 @@ if __name__ == '__main__':
             self.irc.join(channel)
 
             # Register database change hook
-            db_helper.add_db_change_listener(self._databaseupdate)
+            # db_helper.add_db_change_listener(self._databaseupdate)
 
-        def register_privmsg_command(self, name, func, channel_cooldown=0, user_cooldown=0, mod_only=False, broadcaster_only=False, enabled=True):
+        def register_privmsg_command(self, name, func, channel_cooldown=0, user_cooldown=0, mod_only=False,
+                                     broadcaster_only=False, enabled=True):
             """
             Add a new privmsg-command
             Params:
@@ -142,7 +150,8 @@ if __name__ == '__main__':
                 broadcaster_only(bool, default=False): If only broadcaster can use this command
                 enabled(bool, default=True): If the command can be used in chat, otherwise it's useless
             """
-            self.commands_helper.add_privmsg_command(name, func, channel_cooldown, user_cooldown, mod_only, broadcaster_only, enabled)
+            self.commands_helper.add_privmsg_command(name, func, channel_cooldown, user_cooldown, mod_only,
+                                                     broadcaster_only, enabled)
 
         def register_whisper_command(self, name, func, user_cooldown=0):
             """
@@ -155,10 +164,10 @@ if __name__ == '__main__':
                 user_cooldown (int, optional): Number of seconds of cooldown, after a user can use this command again
             """
             self.commands_helper.add_whisper_command(name, func, user_cooldown)
-        
+
         def unregister_privmsg_command(self, name):
             self.commands_helper.remove_privmsg_command(name)
-            
+
         def unregister_whisper_command(self, name):
             self.commands_helper.remove_whisper_command(name)
 
@@ -167,40 +176,16 @@ if __name__ == '__main__':
                 try:
                     component.unload()
                 except Exception as e:
-                    print('Error unloading module '+name+':\n', e)
+                    print('Error unloading module ' + name + ':\n', e)
             self.irc.shutdown()
-            self.database.close()
+            # self.database.close()
 
-        @staticmethod
-        def settingslist_to_dict(settingslist):
-            dictsettings = defaultdict(dict)
-            for setting in settingslist:
-                dictsettings[setting.module][setting.key] = setting.value
-            return dictsettings
-            
-        def _databaseupdate(self):
-            newsettings = settings_db.db_select_all()
-            settingsdiff = settings_db.generate_diff(self.settings, newsettings)
-            if len(settingsdiff) == 0:
-                return
-            self.settings = newsettings
-            changedsettings = (set_tup[1] for set_tup in settingsdiff if not set_tup[1] is None)
-            settingsdict = Lepebot.settingslist_to_dict(changedsettings)
-            for modname, settings in settingsdict.items():
-                if 'active' in settings:
-                    if settings['active'] == '1':
-                        # component is now active! Get all settings from this module and load it
-                        compsettings = Lepebot.settingslist_to_dict(settings_db.db_select_for_module(modname))
-                        self.components[modname].load(compsettings[modname])
-                    else:
-                        # unload component
-                        self.components[modname].unload()
-                elif modname == 'main':
-                    # TODO, this is for the main component and currently
-                    # not used, only for the oauth tokens which shouldn't
-                    # be updated externally
-                    pass
-                else:
-                    self.components[modname].on_update_settings(settings.keys(),settings)
-            
+        # @staticmethod
+        # def settingslist_to_dict(settingslist):
+            # dictsettings = defaultdict(dict)
+            # for setting in settingslist:
+            #    dictsettings[setting.module][setting.key] = setting.value
+            # return dictsettings
+
+
     bot = Lepebot()
